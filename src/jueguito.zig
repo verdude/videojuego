@@ -11,6 +11,8 @@ renderer: *Vulkan,
 
 pub fn init() !Jueguito {
     const window = try Window.init();
+    errdefer window.deinit();
+
     return .{
         .window = window,
         .renderer = try Vulkan.init(window),
@@ -24,6 +26,6 @@ pub fn wan(self: *Jueguito) !void {
 }
 
 pub fn deinit(self: *Jueguito) void {
-    self.window.deinit();
     self.renderer.deinit();
+    self.window.deinit();
 }
