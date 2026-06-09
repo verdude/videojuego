@@ -10,8 +10,6 @@ const c = @cImport({
 });
 
 const allocator = std.heap.page_allocator;
-const WIDTH: u32 = 128;
-const HEIGHT: u32 = 128;
 const MAX_FRAMES_IN_FLIGHT = 2;
 
 const Vulkan = @This();
@@ -76,7 +74,7 @@ pub fn init(window: *wm.Window) !*Vulkan {
     try self.createDevice();
     errdefer c.vkDestroyDevice(self.device, null);
 
-    try self.createSwapchain();
+    try self.createSwapchain(@intCast(window.width), @intCast(window.height));
     errdefer c.vkDestroySwapchainKHR(self.device, self.swapchain, null);
 
     try self.createCommands();
@@ -105,10 +103,7 @@ pub fn deinit(self: *Vulkan) void {
                 null,
             );
     }
-    if (self.command_buffers.len != 0) allocator.free(self.command_buffers);
-    c.vkDestroyCommandPool(self.device, self.command_pool, null);
-    if (self.swapchain_images.len != 0) allocator.free(self.swapchain_images);
-    c.vkDestroySwapchainKHR(self.device, self.swapchain, null);
+    self.destroySwapchainResources();
     c.vkDestroyDevice(self.device, null);
     c.vkDestroySurfaceKHR(self.instance, self.surface, null);
     c.vkDestroyInstance(self.instance, null);
@@ -119,10 +114,49 @@ pub fn deinit(self: *Vulkan) void {
 pub fn run(self: *Vulkan, window: *wm.Window) !void {
     while (window.running) {
         _ = window.display.dispatchPending();
-        try self.drawFrame();
+
+        if (window.resize_pending) {
+            window.resize_pending = false;
+            window.width = window.pending_width;
+            window.height = window.pending_height;
+            try self.recreateSwapchain(@intCast(window.width), @intCast(window.height));
+        }
+
+        if (try self.drawFrame()) {
+            try self.recreateSwapchain(@intCast(window.width), @intCast(window.height));
+        }
+
         _ = window.display.flush();
     }
     _ = c.vkDeviceWaitIdle(self.device);
+}
+
+/// Recreates swapchain-dependent resources after the Wayland window changes size.
+pub fn recreateSwapchain(self: *Vulkan, width: u32, height: u32) !void {
+    _ = c.vkDeviceWaitIdle(self.device);
+    self.destroySwapchainResources();
+    try self.createSwapchain(width, height);
+    try self.createCommands();
+}
+
+/// Destroys the swapchain, image list, command pool, and command buffer list.
+fn destroySwapchainResources(self: *Vulkan) void {
+    if (self.command_buffers.len != 0) {
+        allocator.free(self.command_buffers);
+        self.command_buffers = &.{};
+    }
+    if (self.command_pool != null) {
+        c.vkDestroyCommandPool(self.device, self.command_pool, null);
+        self.command_pool = null;
+    }
+    if (self.swapchain_images.len != 0) {
+        allocator.free(self.swapchain_images);
+        self.swapchain_images = &.{};
+    }
+    if (self.swapchain != null) {
+        c.vkDestroySwapchainKHR(self.device, self.swapchain, null);
+        self.swapchain = null;
+    }
 }
 
 /// Creates a Vulkan instance with the Wayland surface extensions enabled.
@@ -260,7 +294,7 @@ fn createDevice(self: *Vulkan) !void {
 }
 
 /// Chooses surface settings, creates the swapchain, and stores its images.
-fn createSwapchain(self: *Vulkan) !void {
+fn createSwapchain(self: *Vulkan, preferred_width: u32, preferred_height: u32) !void {
     var capabilities: c.VkSurfaceCapabilitiesKHR = undefined;
     try check(c.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
         self.physical_device,
@@ -297,12 +331,12 @@ fn createSwapchain(self: *Vulkan) !void {
     var extent = capabilities.currentExtent;
     if (extent.width == std.math.maxInt(u32)) {
         extent.width = std.math.clamp(
-            WIDTH,
+            preferred_width,
             capabilities.minImageExtent.width,
             capabilities.maxImageExtent.width,
         );
         extent.height = std.math.clamp(
-            HEIGHT,
+            preferred_height,
             capabilities.minImageExtent.height,
             capabilities.maxImageExtent.height,
         );
@@ -389,7 +423,7 @@ fn createSyncObjects(self: *Vulkan) !void {
 }
 
 /// Acquires a swapchain image, records a clear command, submits it, and presents the image.
-fn drawFrame(self: *Vulkan) !void {
+fn drawFrame(self: *Vulkan) !bool {
     const frame = self.current_frame;
     try check(c.vkWaitForFences(
         self.device,
@@ -408,7 +442,7 @@ fn drawFrame(self: *Vulkan) !void {
         null,
         &image_index,
     );
-    if (acquire == c.VK_ERROR_OUT_OF_DATE_KHR) return;
+    if (acquire == c.VK_ERROR_OUT_OF_DATE_KHR) return true;
     try check(acquire);
 
     try check(c.vkResetFences(self.device, 1, &self.in_flight[frame]));
@@ -439,9 +473,11 @@ fn drawFrame(self: *Vulkan) !void {
         .pResults = null,
     };
     const present = c.vkQueuePresentKHR(self.present_queue, &present_info);
-    if (present != c.VK_ERROR_OUT_OF_DATE_KHR and present != c.VK_SUBOPTIMAL_KHR) try check(present);
+    const needs_recreate = present == c.VK_ERROR_OUT_OF_DATE_KHR or present == c.VK_SUBOPTIMAL_KHR;
+    if (!needs_recreate) try check(present);
 
     self.current_frame = (self.current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
+    return needs_recreate;
 }
 
 /// Records commands that transition a swapchain image, clear it, and prepare it for presentation.

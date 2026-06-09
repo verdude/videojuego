@@ -6,6 +6,8 @@ const wl = wayland.client.wl;
 const xdg = wayland.client.xdg;
 
 const allocator = std.heap.page_allocator;
+const MIN_WIDTH: i32 = 960;
+const MIN_HEIGHT: i32 = 540;
 
 const Globals = struct {
     compositor: ?*wl.Compositor,
@@ -23,6 +25,12 @@ pub const Window = struct {
 
     configured: bool,
     running: bool,
+
+    width: i32,
+    height: i32,
+    resize_pending: bool,
+    pending_width: i32,
+    pending_height: i32,
 
     pub fn create() anyerror!*Window {
         var transferred = false;
@@ -52,6 +60,7 @@ pub const Window = struct {
         errdefer if (!transferred) xdg_surface.destroy();
         const xdg_toplevel = try xdg_surface.getToplevel();
         errdefer if (!transferred) xdg_toplevel.destroy();
+        xdg_toplevel.setMinSize(MIN_WIDTH, MIN_HEIGHT);
 
         const window = try allocator.create(Window);
         errdefer if (transferred) window.destroy() else allocator.destroy(window);
@@ -65,9 +74,15 @@ pub const Window = struct {
             .xdg_toplevel = xdg_toplevel,
             .configured = false,
             .running = true,
+            .width = MIN_WIDTH,
+            .height = MIN_HEIGHT,
+            .resize_pending = false,
+            .pending_width = MIN_WIDTH,
+            .pending_height = MIN_HEIGHT,
         };
         transferred = true;
 
+        wm_base.setListener(*Window, xdgWmBaseListener, window);
         xdg_surface.setListener(*Window, xdgSurfaceListener, window);
         xdg_toplevel.setListener(*Window, xdgToplevelListener, window);
 
@@ -102,6 +117,14 @@ pub const Window = struct {
         }
     }
 
+    fn xdgWmBaseListener(wm_base: *xdg.WmBase, event: xdg.WmBase.Event, window: *Window) void {
+        _ = window;
+
+        switch (event) {
+            .ping => |ping| wm_base.pong(ping.serial),
+        }
+    }
+
     fn xdgSurfaceListener(
         xdg_surface: *xdg.Surface,
         event: xdg.Surface.Event,
@@ -110,14 +133,36 @@ pub const Window = struct {
         switch (event) {
             .configure => |configure| {
                 xdg_surface.ackConfigure(configure.serial);
-                window.configured = true;
+
+                if (!window.configured) {
+                    window.configured = true;
+                    window.resize_pending = true;
+                    return;
+                }
+
+                if (window.pending_width != window.width or
+                    window.pending_height != window.height)
+                {
+                    window.resize_pending = true;
+                }
             },
         }
     }
 
-    fn xdgToplevelListener(_: *xdg.Toplevel, event: xdg.Toplevel.Event, window: *Window) void {
+    fn xdgToplevelListener(
+        topLevel: *xdg.Toplevel,
+        event: xdg.Toplevel.Event,
+        window: *Window,
+    ) void {
+        _ = topLevel;
+
         switch (event) {
-            .configure => {},
+            .configure => |configure| {
+                if (configure.width > 0 and configure.height > 0) {
+                    window.pending_width = @max(configure.width, MIN_WIDTH);
+                    window.pending_height = @max(configure.height, MIN_HEIGHT);
+                }
+            },
             .close => window.running = false,
         }
     }
