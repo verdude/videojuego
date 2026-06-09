@@ -32,7 +32,7 @@ pub const Window = struct {
     pending_width: i32,
     pending_height: i32,
 
-    pub fn create() anyerror!*Window {
+    pub fn init() anyerror!*Window {
         var transferred = false;
 
         const display = try wl.Display.connect(null);
@@ -63,7 +63,7 @@ pub const Window = struct {
         xdg_toplevel.setMinSize(MIN_WIDTH, MIN_HEIGHT);
 
         const window = try allocator.create(Window);
-        errdefer if (transferred) window.destroy() else allocator.destroy(window);
+        errdefer if (transferred) window.deinit() else allocator.destroy(window);
 
         window.* = .{
             .display = display,
@@ -94,7 +94,7 @@ pub const Window = struct {
         return window;
     }
 
-    pub fn destroy(self: *Window) void {
+    pub fn deinit(self: *Window) void {
         self.xdg_toplevel.destroy();
         self.xdg_surface.destroy();
         self.surface.destroy();
