@@ -73,8 +73,18 @@ pub fn deinit(self: *Vulkan) void {
     _ = c.vkDeviceWaitIdle(self.device);
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
         if (self.in_flight[i] != null) c.vkDestroyFence(self.device, self.in_flight[i], null);
-        if (self.render_finished[i] != null) c.vkDestroySemaphore(self.device, self.render_finished[i], null);
-        if (self.image_available[i] != null) c.vkDestroySemaphore(self.device, self.image_available[i], null);
+        if (self.render_finished[i] != null)
+            c.vkDestroySemaphore(
+                self.device,
+                self.render_finished[i],
+                null,
+            );
+        if (self.image_available[i] != null)
+            c.vkDestroySemaphore(
+                self.device,
+                self.image_available[i],
+                null,
+            );
     }
     if (self.command_buffers.len != 0) allocator.free(self.command_buffers);
     c.vkDestroyCommandPool(self.device, self.command_pool, null);
@@ -124,7 +134,11 @@ fn createInstance() !c.VkInstance {
     return instance;
 }
 
-fn createWaylandSurface(instance: c.VkInstance, display: *wl.Display, surface: *wl.Surface) !c.VkSurfaceKHR {
+fn createWaylandSurface(
+    instance: c.VkInstance,
+    display: *wl.Display,
+    surface: *wl.Surface,
+) !c.VkSurfaceKHR {
     const create_info = c.VkWaylandSurfaceCreateInfoKHR{
         .sType = c.VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
         .pNext = null,
@@ -163,7 +177,12 @@ fn selectPhysicalDevice(instance: c.VkInstance, surface: c.VkSurfaceKHR) !Select
         for (queues, 0..) |queue, i| {
             if ((queue.queueFlags & c.VK_QUEUE_GRAPHICS_BIT) == 0) continue;
             var present_supported: c.VkBool32 = c.VK_FALSE;
-            try check(c.vkGetPhysicalDeviceSurfaceSupportKHR(device, @intCast(i), surface, &present_supported));
+            try check(c.vkGetPhysicalDeviceSurfaceSupportKHR(
+                device,
+                @intCast(i),
+                surface,
+                &present_supported,
+            ));
             if (present_supported == c.VK_TRUE) {
                 return .{ .device = device, .queue_family_index = @intCast(i) };
             }
@@ -180,7 +199,9 @@ fn hasDeviceExtension(device: c.VkPhysicalDevice, extension_name: [*:0]const u8)
     defer allocator.free(extensions);
     try check(c.vkEnumerateDeviceExtensionProperties(device, null, &count, extensions.ptr));
     for (extensions) |extension| {
-        if (std.mem.orderZ(u8, @ptrCast(&extension.extensionName), extension_name) == .eq) return true;
+        if (std.mem.orderZ(u8, @ptrCast(&extension.extensionName), extension_name) == .eq) {
+            return true;
+        }
     }
     return false;
 }
@@ -215,17 +236,33 @@ fn createDevice(self: *Vulkan) !void {
 
 fn createSwapchain(self: *Vulkan) !void {
     var capabilities: c.VkSurfaceCapabilitiesKHR = undefined;
-    try check(c.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(self.physical_device, self.surface, &capabilities));
+    try check(c.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        self.physical_device,
+        self.surface,
+        &capabilities,
+    ));
 
     var format_count: u32 = 0;
-    try check(c.vkGetPhysicalDeviceSurfaceFormatsKHR(self.physical_device, self.surface, &format_count, null));
+    try check(c.vkGetPhysicalDeviceSurfaceFormatsKHR(
+        self.physical_device,
+        self.surface,
+        &format_count,
+        null,
+    ));
     const formats = try allocator.alloc(c.VkSurfaceFormatKHR, format_count);
     defer allocator.free(formats);
-    try check(c.vkGetPhysicalDeviceSurfaceFormatsKHR(self.physical_device, self.surface, &format_count, formats.ptr));
+    try check(c.vkGetPhysicalDeviceSurfaceFormatsKHR(
+        self.physical_device,
+        self.surface,
+        &format_count,
+        formats.ptr,
+    ));
 
     var chosen_format = formats[0];
     for (formats) |format| {
-        if (format.format == c.VK_FORMAT_B8G8R8A8_SRGB and format.colorSpace == c.VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+        if (format.format == c.VK_FORMAT_B8G8R8A8_SRGB and
+            format.colorSpace == c.VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        {
             chosen_format = format;
             break;
         }
@@ -233,12 +270,22 @@ fn createSwapchain(self: *Vulkan) !void {
 
     var extent = capabilities.currentExtent;
     if (extent.width == std.math.maxInt(u32)) {
-        extent.width = std.math.clamp(WIDTH, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        extent.height = std.math.clamp(HEIGHT, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+        extent.width = std.math.clamp(
+            WIDTH,
+            capabilities.minImageExtent.width,
+            capabilities.maxImageExtent.width,
+        );
+        extent.height = std.math.clamp(
+            HEIGHT,
+            capabilities.minImageExtent.height,
+            capabilities.maxImageExtent.height,
+        );
     }
 
     var image_count = capabilities.minImageCount + 1;
-    if (capabilities.maxImageCount != 0 and image_count > capabilities.maxImageCount) image_count = capabilities.maxImageCount;
+    if (capabilities.maxImageCount != 0 and image_count > capabilities.maxImageCount) {
+        image_count = capabilities.maxImageCount;
+    }
 
     const create_info = c.VkSwapchainCreateInfoKHR{
         .sType = c.VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
@@ -267,7 +314,12 @@ fn createSwapchain(self: *Vulkan) !void {
     var actual_count: u32 = 0;
     try check(c.vkGetSwapchainImagesKHR(self.device, self.swapchain, &actual_count, null));
     self.swapchain_images = try allocator.alloc(c.VkImage, actual_count);
-    try check(c.vkGetSwapchainImagesKHR(self.device, self.swapchain, &actual_count, self.swapchain_images.ptr));
+    try check(c.vkGetSwapchainImagesKHR(
+        self.device,
+        self.swapchain,
+        &actual_count,
+        self.swapchain_images.ptr,
+    ));
 }
 
 fn createCommands(self: *Vulkan) !void {
@@ -310,10 +362,23 @@ fn createSyncObjects(self: *Vulkan) !void {
 
 fn drawFrame(self: *Vulkan) !void {
     const frame = self.current_frame;
-    try check(c.vkWaitForFences(self.device, 1, &self.in_flight[frame], c.VK_TRUE, std.math.maxInt(u64)));
+    try check(c.vkWaitForFences(
+        self.device,
+        1,
+        &self.in_flight[frame],
+        c.VK_TRUE,
+        std.math.maxInt(u64),
+    ));
 
     var image_index: u32 = 0;
-    const acquire = c.vkAcquireNextImageKHR(self.device, self.swapchain, std.math.maxInt(u64), self.image_available[frame], null, &image_index);
+    const acquire = c.vkAcquireNextImageKHR(
+        self.device,
+        self.swapchain,
+        std.math.maxInt(u64),
+        self.image_available[frame],
+        null,
+        &image_index,
+    );
     if (acquire == c.VK_ERROR_OUT_OF_DATE_KHR) return;
     try check(acquire);
 
@@ -360,7 +425,16 @@ fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !voi
     };
     try check(c.vkBeginCommandBuffer(command_buffer, &begin_info));
 
-    imageBarrier(command_buffer, image, c.VK_IMAGE_LAYOUT_UNDEFINED, c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, c.VK_ACCESS_TRANSFER_WRITE_BIT, c.VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, c.VK_PIPELINE_STAGE_TRANSFER_BIT);
+    imageBarrier(
+        command_buffer,
+        image,
+        c.VK_IMAGE_LAYOUT_UNDEFINED,
+        c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        0,
+        c.VK_ACCESS_TRANSFER_WRITE_BIT,
+        c.VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        c.VK_PIPELINE_STAGE_TRANSFER_BIT,
+    );
 
     const clear = c.VkClearColorValue{ .float32 = .{ 0.05, 0.10, 0.20, 1.0 } };
     const range = c.VkImageSubresourceRange{
@@ -370,14 +444,39 @@ fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !voi
         .baseArrayLayer = 0,
         .layerCount = 1,
     };
-    c.vkCmdClearColorImage(command_buffer, image, c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clear, 1, &range);
+    c.vkCmdClearColorImage(
+        command_buffer,
+        image,
+        c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        &clear,
+        1,
+        &range,
+    );
 
-    imageBarrier(command_buffer, image, c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, c.VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, c.VK_ACCESS_TRANSFER_WRITE_BIT, 0, c.VK_PIPELINE_STAGE_TRANSFER_BIT, c.VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+    imageBarrier(
+        command_buffer,
+        image,
+        c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        c.VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        c.VK_ACCESS_TRANSFER_WRITE_BIT,
+        0,
+        c.VK_PIPELINE_STAGE_TRANSFER_BIT,
+        c.VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+    );
 
     try check(c.vkEndCommandBuffer(command_buffer));
 }
 
-fn imageBarrier(command_buffer: c.VkCommandBuffer, image: c.VkImage, old_layout: c.VkImageLayout, new_layout: c.VkImageLayout, src_access: c.VkAccessFlags, dst_access: c.VkAccessFlags, src_stage: c.VkPipelineStageFlags, dst_stage: c.VkPipelineStageFlags) void {
+fn imageBarrier(
+    command_buffer: c.VkCommandBuffer,
+    image: c.VkImage,
+    old_layout: c.VkImageLayout,
+    new_layout: c.VkImageLayout,
+    src_access: c.VkAccessFlags,
+    dst_access: c.VkAccessFlags,
+    src_stage: c.VkPipelineStageFlags,
+    dst_stage: c.VkPipelineStageFlags,
+) void {
     const barrier = c.VkImageMemoryBarrier{
         .sType = c.VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
         .pNext = null,

@@ -1,11 +1,11 @@
 const std = @import("std");
 
-const window_manager = @import("./window_manager.zig");
+const Window = @import("./window_manager.zig").Window;
 const Vulkan = @import("./vulkan.zig");
 
 pub fn main() !void {
     std.log.debug("Creating window", .{});
-    const window = try window_manager.create_window();
+    const window = try Window.create();
     defer window.destroy();
     std.log.debug("Created window", .{});
 
