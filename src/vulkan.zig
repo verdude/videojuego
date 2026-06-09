@@ -16,24 +16,42 @@ const MAX_FRAMES_IN_FLIGHT = 2;
 
 const Vulkan = @This();
 
+/// The top-level Vulkan instance used to load global Vulkan functionality.
 instance: c.VkInstance,
+/// The Vulkan presentation surface created from the Wayland display and surface.
 surface: c.VkSurfaceKHR,
+/// The selected GPU that supports graphics, presentation, and swapchains.
 physical_device: c.VkPhysicalDevice,
+/// The logical device created from the selected physical device.
 device: c.VkDevice,
+/// The queue family index used for both graphics commands and presentation.
 queue_family_index: u32,
+/// The queue that submits graphics and transfer command buffers.
 graphics_queue: c.VkQueue,
+/// The queue that presents rendered swapchain images to the Wayland surface.
 present_queue: c.VkQueue,
+/// The swapchain that owns the presentable images for the Wayland surface.
 swapchain: c.VkSwapchainKHR,
+/// The image format selected for swapchain images.
 swapchain_format: c.VkFormat,
+/// The pixel size selected for swapchain images.
 swapchain_extent: c.VkExtent2D,
+/// The images retrieved from the swapchain and cleared each frame.
 swapchain_images: []c.VkImage,
+/// The command pool used to allocate per-swapchain-image command buffers.
 command_pool: c.VkCommandPool,
+/// Command buffers that record the clear operation for each swapchain image.
 command_buffers: []c.VkCommandBuffer,
+/// Semaphores signaled when swapchain images are ready to be rendered to.
 image_available: [MAX_FRAMES_IN_FLIGHT]c.VkSemaphore,
+/// Semaphores signaled when rendering is complete and images may be presented.
 render_finished: [MAX_FRAMES_IN_FLIGHT]c.VkSemaphore,
+/// Fences that keep CPU frame submission from reusing GPU work still in flight.
 in_flight: [MAX_FRAMES_IN_FLIGHT]c.VkFence,
+/// The rotating frame slot used to index synchronization objects.
 current_frame: usize,
 
+/// Allocates and initializes all Vulkan resources needed to render into a Wayland window.
 pub fn init(window: *wm.Window) !*Vulkan {
     const self = try allocator.create(Vulkan);
     errdefer allocator.destroy(self);
@@ -69,6 +87,7 @@ pub fn init(window: *wm.Window) !*Vulkan {
     return self;
 }
 
+/// Waits for the device to idle and destroys all Vulkan resources owned by this object.
 pub fn deinit(self: *Vulkan) void {
     _ = c.vkDeviceWaitIdle(self.device);
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
@@ -96,6 +115,7 @@ pub fn deinit(self: *Vulkan) void {
     allocator.destroy(self);
 }
 
+/// Runs the render loop, dispatching pending Wayland events and clearing/presenting frames.
 pub fn run(self: *Vulkan, window: *wm.Window) !void {
     while (window.running) {
         _ = window.display.dispatchPending();
@@ -105,6 +125,7 @@ pub fn run(self: *Vulkan, window: *wm.Window) !void {
     _ = c.vkDeviceWaitIdle(self.device);
 }
 
+/// Creates a Vulkan instance with the Wayland surface extensions enabled.
 fn createInstance() !c.VkInstance {
     const app_info = c.VkApplicationInfo{
         .sType = c.VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -134,6 +155,7 @@ fn createInstance() !c.VkInstance {
     return instance;
 }
 
+/// Creates a Vulkan surface from the provided Wayland display and surface handles.
 fn createWaylandSurface(
     instance: c.VkInstance,
     display: *wl.Display,
@@ -156,6 +178,7 @@ const SelectedDevice = struct {
     queue_family_index: u32,
 };
 
+/// Finds a physical device with VK_KHR_swapchain, graphics queue, and present support.
 fn selectPhysicalDevice(instance: c.VkInstance, surface: c.VkSurfaceKHR) !SelectedDevice {
     var count: u32 = 0;
     try check(c.vkEnumeratePhysicalDevices(instance, &count, null));
@@ -192,6 +215,7 @@ fn selectPhysicalDevice(instance: c.VkInstance, surface: c.VkSurfaceKHR) !Select
     return error.NoSuitableVulkanPhysicalDevice;
 }
 
+/// Returns true when the physical device exposes the requested device extension.
 fn hasDeviceExtension(device: c.VkPhysicalDevice, extension_name: [*:0]const u8) !bool {
     var count: u32 = 0;
     try check(c.vkEnumerateDeviceExtensionProperties(device, null, &count, null));
@@ -206,6 +230,7 @@ fn hasDeviceExtension(device: c.VkPhysicalDevice, extension_name: [*:0]const u8)
     return false;
 }
 
+/// Creates the logical device and retrieves the graphics/present queue handle.
 fn createDevice(self: *Vulkan) !void {
     const priority: f32 = 1.0;
     const queue_info = c.VkDeviceQueueCreateInfo{
@@ -234,6 +259,7 @@ fn createDevice(self: *Vulkan) !void {
     self.present_queue = self.graphics_queue;
 }
 
+/// Chooses surface settings, creates the swapchain, and stores its images.
 fn createSwapchain(self: *Vulkan) !void {
     var capabilities: c.VkSurfaceCapabilitiesKHR = undefined;
     try check(c.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -322,6 +348,7 @@ fn createSwapchain(self: *Vulkan) !void {
     ));
 }
 
+/// Creates a command pool and allocates command buffers for swapchain rendering.
 fn createCommands(self: *Vulkan) !void {
     const pool_info = c.VkCommandPoolCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -342,6 +369,7 @@ fn createCommands(self: *Vulkan) !void {
     try check(c.vkAllocateCommandBuffers(self.device, &alloc_info, self.command_buffers.ptr));
 }
 
+/// Creates the semaphores and fences used to synchronize frames in flight.
 fn createSyncObjects(self: *Vulkan) !void {
     const semaphore_info = c.VkSemaphoreCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
@@ -360,6 +388,7 @@ fn createSyncObjects(self: *Vulkan) !void {
     }
 }
 
+/// Acquires a swapchain image, records a clear command, submits it, and presents the image.
 fn drawFrame(self: *Vulkan) !void {
     const frame = self.current_frame;
     try check(c.vkWaitForFences(
@@ -415,6 +444,7 @@ fn drawFrame(self: *Vulkan) !void {
     self.current_frame = (self.current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+/// Records commands that transition a swapchain image, clear it, and prepare it for presentation.
 fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !void {
     try check(c.vkResetCommandBuffer(command_buffer, 0));
     const begin_info = c.VkCommandBufferBeginInfo{
@@ -467,6 +497,7 @@ fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !voi
     try check(c.vkEndCommandBuffer(command_buffer));
 }
 
+/// Emits an image memory barrier for layout transitions and access synchronization.
 fn imageBarrier(
     command_buffer: c.VkCommandBuffer,
     image: c.VkImage,
@@ -498,6 +529,7 @@ fn imageBarrier(
     c.vkCmdPipelineBarrier(command_buffer, src_stage, dst_stage, 0, 0, null, 0, null, 1, &barrier);
 }
 
+/// Converts non-success Vulkan result codes into a Zig error.
 fn check(result: c.VkResult) !void {
     if (result != c.VK_SUCCESS) return error.VulkanError;
 }
