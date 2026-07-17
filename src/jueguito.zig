@@ -21,8 +21,28 @@ pub fn init() !Jueguito {
 
 /// Game loop
 pub fn wan(self: *Jueguito) !void {
-    // move them aqui
-    try self.renderer.run(self.window);
+    while (self.window.running) {
+        _ = self.window.display.dispatchPending();
+
+        if (self.window.resize_pending) {
+            self.window.resize_pending = false;
+            self.window.width = self.window.pending_width;
+            self.window.height = self.window.pending_height;
+            try self.renderer.recreateSwapchain(
+                @intCast(self.window.width),
+                @intCast(self.window.height),
+            );
+        }
+
+        if (try self.renderer.drawFrame()) {
+            try self.renderer.recreateSwapchain(
+                @intCast(self.window.width),
+                @intCast(self.window.height),
+            );
+        }
+
+        _ = self.window.display.flush();
+    }
 }
 
 pub fn deinit(self: *Jueguito) void {

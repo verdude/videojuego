@@ -110,27 +110,6 @@ pub fn deinit(self: *Vulkan) void {
     allocator.destroy(self);
 }
 
-/// Runs the render loop, dispatching pending Wayland events and clearing/presenting frames.
-pub fn run(self: *Vulkan, window: *wm.Window) !void {
-    while (window.running) {
-        _ = window.display.dispatchPending();
-
-        if (window.resize_pending) {
-            window.resize_pending = false;
-            window.width = window.pending_width;
-            window.height = window.pending_height;
-            try self.recreateSwapchain(@intCast(window.width), @intCast(window.height));
-        }
-
-        if (try self.drawFrame()) {
-            try self.recreateSwapchain(@intCast(window.width), @intCast(window.height));
-        }
-
-        _ = window.display.flush();
-    }
-    _ = c.vkDeviceWaitIdle(self.device);
-}
-
 /// Recreates swapchain-dependent resources after the Wayland window changes size.
 pub fn recreateSwapchain(self: *Vulkan, width: u32, height: u32) !void {
     _ = c.vkDeviceWaitIdle(self.device);
@@ -265,6 +244,7 @@ fn hasDeviceExtension(device: c.VkPhysicalDevice, extension_name: [*:0]const u8)
 }
 
 /// Creates the logical device and retrieves the graphics/present queue handle.
+/// Returns whether a recreate is required.
 fn createDevice(self: *Vulkan) !void {
     const priority: f32 = 1.0;
     const queue_info = c.VkDeviceQueueCreateInfo{
@@ -423,7 +403,7 @@ fn createSyncObjects(self: *Vulkan) !void {
 }
 
 /// Acquires a swapchain image, records a clear command, submits it, and presents the image.
-fn drawFrame(self: *Vulkan) !bool {
+pub fn drawFrame(self: *Vulkan) !bool {
     const frame = self.current_frame;
     try check(c.vkWaitForFences(
         self.device,
