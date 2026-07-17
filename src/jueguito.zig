@@ -22,16 +22,10 @@ pub fn init() !Jueguito {
 /// Game loop
 pub fn wan(self: *Jueguito) !void {
     while (self.window.running) {
-        _ = self.window.display.dispatchPending();
+        try self.window.pollEvents();
 
-        if (self.window.resize_pending) {
-            self.window.resize_pending = false;
-            self.window.width = self.window.pending_width;
-            self.window.height = self.window.pending_height;
-            try self.renderer.recreateSwapchain(
-                @intCast(self.window.width),
-                @intCast(self.window.height),
-            );
+        if (self.window.takeResize()) |extent| {
+            try self.renderer.recreateSwapchain(extent.width, extent.height);
         }
 
         if (try self.renderer.drawFrame()) {
@@ -40,8 +34,6 @@ pub fn wan(self: *Jueguito) !void {
                 @intCast(self.window.height),
             );
         }
-
-        _ = self.window.display.flush();
     }
 }
 

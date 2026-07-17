@@ -32,6 +32,11 @@ pub const Window = struct {
     pending_width: i32,
     pending_height: i32,
 
+    pub const Extent = struct {
+        width: u32,
+        height: u32,
+    };
+
     pub fn init() anyerror!*Window {
         var transferred = false;
 
@@ -92,6 +97,55 @@ pub const Window = struct {
         }
 
         return window;
+    }
+
+    /// Reads and dispatches any Wayland events that are currently available.
+    pub fn pollEvents(self: *Window) !void {
+        while (!self.display.prepareRead()) {
+            if (self.display.dispatchPending() != .SUCCESS) return error.DispatchFailed;
+        }
+
+        const flush_result = self.display.flush();
+        if (flush_result != .SUCCESS and flush_result != .AGAIN) {
+            self.display.cancelRead();
+            return error.FlushFailed;
+        }
+
+        var poll_fds = [_]std.posix.pollfd{.{
+            .fd = self.display.getFd(),
+            .events = std.posix.POLL.IN,
+            .revents = 0,
+        }};
+        const ready = std.posix.poll(&poll_fds, 0) catch |err| {
+            self.display.cancelRead();
+            return err;
+        };
+
+        if (ready == 0 or (poll_fds[0].revents & std.posix.POLL.IN) == 0) {
+            self.display.cancelRead();
+            if ((poll_fds[0].revents &
+                (std.posix.POLL.ERR | std.posix.POLL.HUP | std.posix.POLL.NVAL)) != 0)
+            {
+                return error.DisplayDisconnected;
+            }
+            return;
+        }
+
+        if (self.display.readEvents() != .SUCCESS) return error.ReadEventsFailed;
+        if (self.display.dispatchPending() != .SUCCESS) return error.DispatchFailed;
+    }
+
+    /// Applies and returns the latest pending window size, if it changed.
+    pub fn takeResize(self: *Window) ?Extent {
+        if (!self.resize_pending) return null;
+
+        self.resize_pending = false;
+        self.width = self.pending_width;
+        self.height = self.pending_height;
+        return .{
+            .width = @intCast(self.width),
+            .height = @intCast(self.height),
+        };
     }
 
     pub fn deinit(self: *Window) void {
