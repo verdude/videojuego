@@ -6,6 +6,7 @@ const wl = wayland.client.wl;
 const xdg = wayland.client.xdg;
 
 const vk = @cImport({
+    @cDefine("VK_NO_PROTOTYPES", "1");
     @cDefine("VK_USE_PLATFORM_WAYLAND_KHR", "1");
     @cInclude("vulkan/vulkan.h");
     @cInclude("wayland-client.h");
@@ -162,8 +163,22 @@ pub const Window = struct {
         return "VK_KHR_wayland_surface";
     }
 
-    pub fn createVulkanSurface(self: *const Window, instance_handle: u64) !u64 {
+    pub fn createVulkanSurface(
+        self: *const Window,
+        instance_handle: u64,
+        get_instance_proc_addr_handle: u64,
+    ) !u64 {
         const instance = vulkanHandleFromU64(vk.VkInstance, instance_handle);
+        const get_instance_proc_addr = vulkanHandleFromU64(
+            requiredProcType(vk.PFN_vkGetInstanceProcAddr),
+            get_instance_proc_addr_handle,
+        );
+        const raw_create_surface = get_instance_proc_addr(
+            instance,
+            "vkCreateWaylandSurfaceKHR",
+        ) orelse return error.VulkanSurfaceEntryPointNotFound;
+        const create_surface: requiredProcType(vk.PFN_vkCreateWaylandSurfaceKHR) =
+            @ptrCast(raw_create_surface);
         const create_info = vk.VkWaylandSurfaceCreateInfoKHR{
             .sType = vk.VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
             .pNext = null,
@@ -172,7 +187,7 @@ pub const Window = struct {
             .surface = @ptrCast(self.surface),
         };
         var surface: vk.VkSurfaceKHR = std.mem.zeroes(vk.VkSurfaceKHR);
-        if (vk.vkCreateWaylandSurfaceKHR(instance, &create_info, null, &surface) != vk.VK_SUCCESS) {
+        if (create_surface(instance, &create_info, null, &surface) != vk.VK_SUCCESS) {
             return error.VulkanSurfaceCreationFailed;
         }
         return vulkanHandleToU64(surface);
@@ -186,6 +201,10 @@ pub const Window = struct {
         self.compositor.destroy();
         self.display.disconnect();
         allocator.destroy(self);
+    }
+
+    fn requiredProcType(comptime Proc: type) type {
+        return @typeInfo(Proc).optional.child;
     }
 
     fn vulkanHandleFromU64(comptime Handle: type, value: u64) Handle {

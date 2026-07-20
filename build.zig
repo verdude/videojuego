@@ -17,11 +17,11 @@ pub fn build(b: *std.Build) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
-    const vulkan_sdk = b.option(
+    const vulkan_headers = b.option(
         []const u8,
-        "vulkan-sdk",
-        "Path to the Vulkan SDK (uses Include and Lib on Windows)",
-    ) orelse b.graph.environ_map.get("VULKAN_SDK");
+        "vulkan-headers",
+        "Path to a Vulkan-Headers checkout",
+    ) orelse "vendor/Vulkan-Headers";
 
     const is_windows = target.result.os.tag == .windows;
     const wayland = if (!is_windows) blk: {
@@ -107,6 +107,10 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    exe.root_module.addIncludePath(.{
+        .cwd_relative = b.pathJoin(&.{ vulkan_headers, "include" }),
+    });
+
     if (wayland) |module| {
         exe.root_module.link_libc = true;
         exe.root_module.addImport("wayland", module);
@@ -114,19 +118,9 @@ pub fn build(b: *std.Build) void {
         exe.root_module.linkSystemLibrary("vulkan", .{});
     } else {
         exe.root_module.link_libc = true;
-        if (vulkan_sdk) |sdk| {
-            exe.root_module.addIncludePath(.{
-                .cwd_relative = b.pathJoin(&.{ sdk, "Include" }),
-            });
-            const lib_dir = if (target.result.cpu.arch == .x86) "Lib32" else "Lib";
-            exe.root_module.addLibraryPath(.{
-                .cwd_relative = b.pathJoin(&.{ sdk, lib_dir }),
-            });
-        }
         exe.root_module.linkSystemLibrary("kernel32", .{});
         exe.root_module.linkSystemLibrary("user32", .{});
         exe.root_module.linkSystemLibrary("gdi32", .{});
-        exe.root_module.linkSystemLibrary("vulkan-1", .{});
     }
 
     // This declares intent for the executable to be installed into the

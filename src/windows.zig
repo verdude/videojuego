@@ -6,6 +6,7 @@ const win = @cImport({
     @cDefine("UNICODE", "1");
     @cDefine("_UNICODE", "1");
     @cInclude("windows.h");
+    @cDefine("VK_NO_PROTOTYPES", "1");
     @cDefine("VK_USE_PLATFORM_WIN32_KHR", "1");
     @cInclude("vulkan/vulkan.h");
 });
@@ -17,11 +18,13 @@ const WINDOW_STYLE = win.WS_OVERLAPPEDWINDOW;
 const WINDOW_EX_STYLE = 0;
 const CLASS_NAME = std.unicode.utf8ToUtf16LeStringLiteral("JueguitoWindowClass");
 const WINDOW_TITLE = std.unicode.utf8ToUtf16LeStringLiteral("Jueguito");
+const VULKAN_LOADER_NAME = std.unicode.utf8ToUtf16LeStringLiteral("vulkan-1.dll");
 
 pub const Window = struct {
     hwnd: win.HWND,
     instance: win.HINSTANCE,
     class_atom: win.ATOM,
+    vulkan_library: win.HMODULE,
 
     running: bool,
     focused: bool,
@@ -40,6 +43,10 @@ pub const Window = struct {
         try enablePerMonitorDpiV2();
 
         const instance = win.GetModuleHandleW(null) orelse return error.GetModuleHandleFailed;
+        const vulkan_library = win.LoadLibraryW(VULKAN_LOADER_NAME) orelse
+            return error.VulkanLoaderNotFound;
+        errdefer _ = win.FreeLibrary(vulkan_library);
+
         const self = try allocator.create(Window);
         errdefer allocator.destroy(self);
 
@@ -47,6 +54,7 @@ pub const Window = struct {
             .hwnd = null,
             .instance = instance,
             .class_atom = 0,
+            .vulkan_library = vulkan_library,
             .running = true,
             .focused = true,
             .minimized = false,
@@ -156,9 +164,29 @@ pub const Window = struct {
         return "VK_KHR_win32_surface";
     }
 
+    pub fn vulkanGetInstanceProcAddr(self: *const Window) !u64 {
+        const address = win.GetProcAddress(self.vulkan_library, "vkGetInstanceProcAddr") orelse
+            return error.VulkanLoaderEntryPointNotFound;
+        return @intFromPtr(address);
+    }
+
     /// Creates the Win32 Vulkan surface while keeping HWND/HINSTANCE private here.
-    pub fn createVulkanSurface(self: *const Window, instance_handle: u64) !u64 {
+    pub fn createVulkanSurface(
+        self: *const Window,
+        instance_handle: u64,
+        get_instance_proc_addr_handle: u64,
+    ) !u64 {
         const instance = vulkanHandleFromU64(win.VkInstance, instance_handle);
+        const get_instance_proc_addr = vulkanHandleFromU64(
+            requiredProcType(win.PFN_vkGetInstanceProcAddr),
+            get_instance_proc_addr_handle,
+        );
+        const raw_create_surface = get_instance_proc_addr(
+            instance,
+            "vkCreateWin32SurfaceKHR",
+        ) orelse return error.VulkanSurfaceEntryPointNotFound;
+        const create_surface: requiredProcType(win.PFN_vkCreateWin32SurfaceKHR) =
+            @ptrCast(raw_create_surface);
         const create_info = win.VkWin32SurfaceCreateInfoKHR{
             .sType = win.VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
             .pNext = null,
@@ -167,7 +195,7 @@ pub const Window = struct {
             .hwnd = self.hwnd,
         };
         var surface: win.VkSurfaceKHR = std.mem.zeroes(win.VkSurfaceKHR);
-        if (win.vkCreateWin32SurfaceKHR(instance, &create_info, null, &surface) != win.VK_SUCCESS) {
+        if (create_surface(instance, &create_info, null, &surface) != win.VK_SUCCESS) {
             return error.VulkanSurfaceCreationFailed;
         }
         return vulkanHandleToU64(surface);
@@ -182,6 +210,7 @@ pub const Window = struct {
             _ = win.UnregisterClassW(CLASS_NAME, self.instance);
             self.class_atom = 0;
         }
+        _ = win.FreeLibrary(self.vulkan_library);
         allocator.destroy(self);
     }
 
@@ -287,6 +316,10 @@ pub const Window = struct {
         }
     }
 };
+
+fn requiredProcType(comptime Proc: type) type {
+    return @typeInfo(Proc).optional.child;
+}
 
 fn vulkanHandleFromU64(comptime Handle: type, value: u64) Handle {
     return switch (@typeInfo(Handle)) {

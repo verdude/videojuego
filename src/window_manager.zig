@@ -95,16 +95,30 @@ pub fn vulkanSurfaceExtension(self: *const WindowManager) [*:0]const u8 {
     };
 }
 
+pub fn vulkanGetInstanceProcAddr(self: *const WindowManager) !u64 {
+    return switch (self.backend) {
+        .wayland => if (is_windows) unreachable else error.UnsupportedWindowBackend,
+        .windows => |window| if (is_windows)
+            try window.vulkanGetInstanceProcAddr()
+        else
+            unreachable,
+    };
+}
+
 /// Uses integer handles at this boundary so backend-specific Vulkan C types do
 /// not leak into the platform-neutral window manager or renderer.
-pub fn createVulkanSurface(self: *const WindowManager, instance_handle: u64) !u64 {
+pub fn createVulkanSurface(
+    self: *const WindowManager,
+    instance_handle: u64,
+    get_instance_proc_addr_handle: u64,
+) !u64 {
     return switch (self.backend) {
         .wayland => |window| if (is_windows)
             unreachable
         else
-            try window.createVulkanSurface(instance_handle),
+            try window.createVulkanSurface(instance_handle, get_instance_proc_addr_handle),
         .windows => |window| if (is_windows)
-            try window.createVulkanSurface(instance_handle)
+            try window.createVulkanSurface(instance_handle, get_instance_proc_addr_handle)
         else
             unreachable,
     };

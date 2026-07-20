@@ -1,12 +1,125 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const wm = @import("./window_manager.zig");
 
 const c = @cImport({
+    @cDefine("VK_NO_PROTOTYPES", "1");
     @cInclude("vulkan/vulkan.h");
 });
 
 const allocator = std.heap.page_allocator;
 const MAX_FRAMES_IN_FLIGHT = 2;
+
+fn RequiredProc(comptime Proc: type) type {
+    return @typeInfo(Proc).optional.child;
+}
+
+const VulkanApi = struct {
+    vkGetInstanceProcAddr: RequiredProc(c.PFN_vkGetInstanceProcAddr),
+    vkGetDeviceProcAddr: RequiredProc(c.PFN_vkGetDeviceProcAddr),
+    vkCreateInstance: RequiredProc(c.PFN_vkCreateInstance),
+    vkDestroyInstance: RequiredProc(c.PFN_vkDestroyInstance),
+    vkEnumeratePhysicalDevices: RequiredProc(c.PFN_vkEnumeratePhysicalDevices),
+    vkGetPhysicalDeviceQueueFamilyProperties: RequiredProc(c.PFN_vkGetPhysicalDeviceQueueFamilyProperties),
+    vkEnumerateDeviceExtensionProperties: RequiredProc(c.PFN_vkEnumerateDeviceExtensionProperties),
+    vkGetPhysicalDeviceSurfaceSupportKHR: RequiredProc(c.PFN_vkGetPhysicalDeviceSurfaceSupportKHR),
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR: RequiredProc(c.PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR),
+    vkGetPhysicalDeviceSurfaceFormatsKHR: RequiredProc(c.PFN_vkGetPhysicalDeviceSurfaceFormatsKHR),
+    vkCreateDevice: RequiredProc(c.PFN_vkCreateDevice),
+    vkDestroySurfaceKHR: RequiredProc(c.PFN_vkDestroySurfaceKHR),
+    vkDestroyDevice: RequiredProc(c.PFN_vkDestroyDevice),
+    vkGetDeviceQueue: RequiredProc(c.PFN_vkGetDeviceQueue),
+    vkCreateSwapchainKHR: RequiredProc(c.PFN_vkCreateSwapchainKHR),
+    vkDestroySwapchainKHR: RequiredProc(c.PFN_vkDestroySwapchainKHR),
+    vkGetSwapchainImagesKHR: RequiredProc(c.PFN_vkGetSwapchainImagesKHR),
+    vkCreateCommandPool: RequiredProc(c.PFN_vkCreateCommandPool),
+    vkDestroyCommandPool: RequiredProc(c.PFN_vkDestroyCommandPool),
+    vkAllocateCommandBuffers: RequiredProc(c.PFN_vkAllocateCommandBuffers),
+    vkCreateSemaphore: RequiredProc(c.PFN_vkCreateSemaphore),
+    vkDestroySemaphore: RequiredProc(c.PFN_vkDestroySemaphore),
+    vkCreateFence: RequiredProc(c.PFN_vkCreateFence),
+    vkDestroyFence: RequiredProc(c.PFN_vkDestroyFence),
+    vkDeviceWaitIdle: RequiredProc(c.PFN_vkDeviceWaitIdle),
+    vkAcquireNextImageKHR: RequiredProc(c.PFN_vkAcquireNextImageKHR),
+    vkWaitForFences: RequiredProc(c.PFN_vkWaitForFences),
+    vkResetFences: RequiredProc(c.PFN_vkResetFences),
+    vkResetCommandBuffer: RequiredProc(c.PFN_vkResetCommandBuffer),
+    vkBeginCommandBuffer: RequiredProc(c.PFN_vkBeginCommandBuffer),
+    vkEndCommandBuffer: RequiredProc(c.PFN_vkEndCommandBuffer),
+    vkCmdClearColorImage: RequiredProc(c.PFN_vkCmdClearColorImage),
+    vkCmdPipelineBarrier: RequiredProc(c.PFN_vkCmdPipelineBarrier),
+    vkQueueSubmit: RequiredProc(c.PFN_vkQueueSubmit),
+    vkQueuePresentKHR: RequiredProc(c.PFN_vkQueuePresentKHR),
+
+    fn loadGlobal(self: *VulkanApi, get_instance_proc_addr: RequiredProc(c.PFN_vkGetInstanceProcAddr)) !void {
+        self.vkGetInstanceProcAddr = get_instance_proc_addr;
+        self.vkCreateInstance = try loadInstanceProc(
+            c.PFN_vkCreateInstance,
+            get_instance_proc_addr,
+            null,
+            "vkCreateInstance",
+        );
+    }
+
+    fn loadInstance(self: *VulkanApi, instance: c.VkInstance) !void {
+        const get = self.vkGetInstanceProcAddr;
+        self.vkGetDeviceProcAddr = try loadInstanceProc(c.PFN_vkGetDeviceProcAddr, get, instance, "vkGetDeviceProcAddr");
+        self.vkEnumeratePhysicalDevices = try loadInstanceProc(c.PFN_vkEnumeratePhysicalDevices, get, instance, "vkEnumeratePhysicalDevices");
+        self.vkGetPhysicalDeviceQueueFamilyProperties = try loadInstanceProc(c.PFN_vkGetPhysicalDeviceQueueFamilyProperties, get, instance, "vkGetPhysicalDeviceQueueFamilyProperties");
+        self.vkEnumerateDeviceExtensionProperties = try loadInstanceProc(c.PFN_vkEnumerateDeviceExtensionProperties, get, instance, "vkEnumerateDeviceExtensionProperties");
+        self.vkGetPhysicalDeviceSurfaceSupportKHR = try loadInstanceProc(c.PFN_vkGetPhysicalDeviceSurfaceSupportKHR, get, instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        self.vkGetPhysicalDeviceSurfaceCapabilitiesKHR = try loadInstanceProc(c.PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR, get, instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+        self.vkGetPhysicalDeviceSurfaceFormatsKHR = try loadInstanceProc(c.PFN_vkGetPhysicalDeviceSurfaceFormatsKHR, get, instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        self.vkCreateDevice = try loadInstanceProc(c.PFN_vkCreateDevice, get, instance, "vkCreateDevice");
+        self.vkDestroySurfaceKHR = try loadInstanceProc(c.PFN_vkDestroySurfaceKHR, get, instance, "vkDestroySurfaceKHR");
+    }
+
+    fn loadDevice(self: *VulkanApi, device: c.VkDevice) !void {
+        const get = self.vkGetDeviceProcAddr;
+        self.vkGetDeviceQueue = try loadDeviceProc(c.PFN_vkGetDeviceQueue, get, device, "vkGetDeviceQueue");
+        self.vkCreateSwapchainKHR = try loadDeviceProc(c.PFN_vkCreateSwapchainKHR, get, device, "vkCreateSwapchainKHR");
+        self.vkDestroySwapchainKHR = try loadDeviceProc(c.PFN_vkDestroySwapchainKHR, get, device, "vkDestroySwapchainKHR");
+        self.vkGetSwapchainImagesKHR = try loadDeviceProc(c.PFN_vkGetSwapchainImagesKHR, get, device, "vkGetSwapchainImagesKHR");
+        self.vkCreateCommandPool = try loadDeviceProc(c.PFN_vkCreateCommandPool, get, device, "vkCreateCommandPool");
+        self.vkDestroyCommandPool = try loadDeviceProc(c.PFN_vkDestroyCommandPool, get, device, "vkDestroyCommandPool");
+        self.vkAllocateCommandBuffers = try loadDeviceProc(c.PFN_vkAllocateCommandBuffers, get, device, "vkAllocateCommandBuffers");
+        self.vkCreateSemaphore = try loadDeviceProc(c.PFN_vkCreateSemaphore, get, device, "vkCreateSemaphore");
+        self.vkDestroySemaphore = try loadDeviceProc(c.PFN_vkDestroySemaphore, get, device, "vkDestroySemaphore");
+        self.vkCreateFence = try loadDeviceProc(c.PFN_vkCreateFence, get, device, "vkCreateFence");
+        self.vkDestroyFence = try loadDeviceProc(c.PFN_vkDestroyFence, get, device, "vkDestroyFence");
+        self.vkDeviceWaitIdle = try loadDeviceProc(c.PFN_vkDeviceWaitIdle, get, device, "vkDeviceWaitIdle");
+        self.vkAcquireNextImageKHR = try loadDeviceProc(c.PFN_vkAcquireNextImageKHR, get, device, "vkAcquireNextImageKHR");
+        self.vkWaitForFences = try loadDeviceProc(c.PFN_vkWaitForFences, get, device, "vkWaitForFences");
+        self.vkResetFences = try loadDeviceProc(c.PFN_vkResetFences, get, device, "vkResetFences");
+        self.vkResetCommandBuffer = try loadDeviceProc(c.PFN_vkResetCommandBuffer, get, device, "vkResetCommandBuffer");
+        self.vkBeginCommandBuffer = try loadDeviceProc(c.PFN_vkBeginCommandBuffer, get, device, "vkBeginCommandBuffer");
+        self.vkEndCommandBuffer = try loadDeviceProc(c.PFN_vkEndCommandBuffer, get, device, "vkEndCommandBuffer");
+        self.vkCmdClearColorImage = try loadDeviceProc(c.PFN_vkCmdClearColorImage, get, device, "vkCmdClearColorImage");
+        self.vkCmdPipelineBarrier = try loadDeviceProc(c.PFN_vkCmdPipelineBarrier, get, device, "vkCmdPipelineBarrier");
+        self.vkQueueSubmit = try loadDeviceProc(c.PFN_vkQueueSubmit, get, device, "vkQueueSubmit");
+        self.vkQueuePresentKHR = try loadDeviceProc(c.PFN_vkQueuePresentKHR, get, device, "vkQueuePresentKHR");
+    }
+};
+
+var vulkan_api: VulkanApi = undefined;
+
+fn loadInstanceProc(
+    comptime Proc: type,
+    get: RequiredProc(c.PFN_vkGetInstanceProcAddr),
+    instance: c.VkInstance,
+    name: [:0]const u8,
+) !RequiredProc(Proc) {
+    return @ptrCast(get(instance, name) orelse return error.MissingVulkanEntryPoint);
+}
+
+fn loadDeviceProc(
+    comptime Proc: type,
+    get: RequiredProc(c.PFN_vkGetDeviceProcAddr),
+    device: c.VkDevice,
+    name: [:0]const u8,
+) !RequiredProc(Proc) {
+    return @ptrCast(get(device, name) orelse return error.MissingVulkanEntryPoint);
+}
 
 const Vulkan = @This();
 
@@ -48,6 +161,17 @@ current_frame: usize,
 /// Allocates and initializes all Vulkan resources needed to render into a native window.
 pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
     const initial_extent = window_manager.extent();
+    const get_instance_proc_addr_handle = if (builtin.os.tag == .windows)
+        try window_manager.vulkanGetInstanceProcAddr()
+    else
+        @intFromPtr(@extern(RequiredProc(c.PFN_vkGetInstanceProcAddr), .{
+            .name = "vkGetInstanceProcAddr",
+        }));
+    const get_instance_proc_addr = vulkanHandleFromU64(
+        RequiredProc(c.PFN_vkGetInstanceProcAddr),
+        get_instance_proc_addr_handle,
+    );
+    try vulkan_api.loadGlobal(get_instance_proc_addr);
 
     const self = try allocator.create(Vulkan);
     errdefer allocator.destroy(self);
@@ -60,24 +184,34 @@ pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
     self.in_flight = [_]c.VkFence{null} ** MAX_FRAMES_IN_FLIGHT;
 
     self.instance = try createInstance(window_manager.vulkanSurfaceExtension());
-    errdefer _ = c.vkDestroyInstance(self.instance, null);
+    vulkan_api.vkDestroyInstance = try loadInstanceProc(
+        c.PFN_vkDestroyInstance,
+        vulkan_api.vkGetInstanceProcAddr,
+        self.instance,
+        "vkDestroyInstance",
+    );
+    errdefer vulkan_api.vkDestroyInstance(self.instance, null);
+    try vulkan_api.loadInstance(self.instance);
 
-    const surface_handle = try window_manager.createVulkanSurface(@intFromPtr(self.instance));
+    const surface_handle = try window_manager.createVulkanSurface(
+        @intFromPtr(self.instance),
+        get_instance_proc_addr_handle,
+    );
     self.surface = vulkanHandleFromU64(c.VkSurfaceKHR, surface_handle);
-    errdefer c.vkDestroySurfaceKHR(self.instance, self.surface, null);
+    errdefer vulkan_api.vkDestroySurfaceKHR(self.instance, self.surface, null);
 
     const selected = try selectPhysicalDevice(self.instance, self.surface);
     self.physical_device = selected.device;
     self.queue_family_index = selected.queue_family_index;
 
     try self.createDevice();
-    errdefer c.vkDestroyDevice(self.device, null);
+    errdefer vulkan_api.vkDestroyDevice(self.device, null);
 
     try self.createSwapchain(initial_extent.width, initial_extent.height);
-    errdefer c.vkDestroySwapchainKHR(self.device, self.swapchain, null);
+    errdefer vulkan_api.vkDestroySwapchainKHR(self.device, self.swapchain, null);
 
     try self.createCommands();
-    errdefer c.vkDestroyCommandPool(self.device, self.command_pool, null);
+    errdefer vulkan_api.vkDestroyCommandPool(self.device, self.command_pool, null);
 
     try self.createSyncObjects();
 
@@ -86,32 +220,32 @@ pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
 
 /// Waits for the device to idle and destroys all Vulkan resources owned by this object.
 pub fn deinit(self: *Vulkan) void {
-    _ = c.vkDeviceWaitIdle(self.device);
+    _ = vulkan_api.vkDeviceWaitIdle(self.device);
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-        if (self.in_flight[i] != null) c.vkDestroyFence(self.device, self.in_flight[i], null);
+        if (self.in_flight[i] != null) vulkan_api.vkDestroyFence(self.device, self.in_flight[i], null);
         if (self.render_finished[i] != null)
-            c.vkDestroySemaphore(
+            vulkan_api.vkDestroySemaphore(
                 self.device,
                 self.render_finished[i],
                 null,
             );
         if (self.image_available[i] != null)
-            c.vkDestroySemaphore(
+            vulkan_api.vkDestroySemaphore(
                 self.device,
                 self.image_available[i],
                 null,
             );
     }
     self.destroySwapchainResources();
-    c.vkDestroyDevice(self.device, null);
-    c.vkDestroySurfaceKHR(self.instance, self.surface, null);
-    c.vkDestroyInstance(self.instance, null);
+    vulkan_api.vkDestroyDevice(self.device, null);
+    vulkan_api.vkDestroySurfaceKHR(self.instance, self.surface, null);
+    vulkan_api.vkDestroyInstance(self.instance, null);
     allocator.destroy(self);
 }
 
 /// Recreates swapchain-dependent resources after the native window changes size.
 pub fn recreateSwapchain(self: *Vulkan, width: u32, height: u32) !void {
-    _ = c.vkDeviceWaitIdle(self.device);
+    _ = vulkan_api.vkDeviceWaitIdle(self.device);
     self.destroySwapchainResources();
     try self.createSwapchain(width, height);
     try self.createCommands();
@@ -124,7 +258,7 @@ fn destroySwapchainResources(self: *Vulkan) void {
         self.command_buffers = &.{};
     }
     if (self.command_pool != null) {
-        c.vkDestroyCommandPool(self.device, self.command_pool, null);
+        vulkan_api.vkDestroyCommandPool(self.device, self.command_pool, null);
         self.command_pool = null;
     }
     if (self.swapchain_images.len != 0) {
@@ -132,7 +266,7 @@ fn destroySwapchainResources(self: *Vulkan) void {
         self.swapchain_images = &.{};
     }
     if (self.swapchain != null) {
-        c.vkDestroySwapchainKHR(self.device, self.swapchain, null);
+        vulkan_api.vkDestroySwapchainKHR(self.device, self.swapchain, null);
         self.swapchain = null;
     }
 }
@@ -163,7 +297,7 @@ fn createInstance(platform_surface_extension: [*:0]const u8) !c.VkInstance {
         .ppEnabledExtensionNames = &extensions,
     };
     var instance: c.VkInstance = null;
-    try check(c.vkCreateInstance(&create_info, null, &instance));
+    try check(vulkan_api.vkCreateInstance(&create_info, null, &instance));
     return instance;
 }
 
@@ -175,26 +309,26 @@ const SelectedDevice = struct {
 /// Finds a physical device with VK_KHR_swapchain, graphics queue, and present support.
 fn selectPhysicalDevice(instance: c.VkInstance, surface: c.VkSurfaceKHR) !SelectedDevice {
     var count: u32 = 0;
-    try check(c.vkEnumeratePhysicalDevices(instance, &count, null));
+    try check(vulkan_api.vkEnumeratePhysicalDevices(instance, &count, null));
     if (count == 0) return error.NoVulkanPhysicalDevice;
 
     const devices = try allocator.alloc(c.VkPhysicalDevice, count);
     defer allocator.free(devices);
-    try check(c.vkEnumeratePhysicalDevices(instance, &count, devices.ptr));
+    try check(vulkan_api.vkEnumeratePhysicalDevices(instance, &count, devices.ptr));
 
     for (devices) |device| {
         if (!try hasDeviceExtension(device, c.VK_KHR_SWAPCHAIN_EXTENSION_NAME)) continue;
 
         var queue_count: u32 = 0;
-        c.vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_count, null);
+        vulkan_api.vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_count, null);
         const queues = try allocator.alloc(c.VkQueueFamilyProperties, queue_count);
         defer allocator.free(queues);
-        c.vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_count, queues.ptr);
+        vulkan_api.vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_count, queues.ptr);
 
         for (queues, 0..) |queue, i| {
             if ((queue.queueFlags & c.VK_QUEUE_GRAPHICS_BIT) == 0) continue;
             var present_supported: c.VkBool32 = c.VK_FALSE;
-            try check(c.vkGetPhysicalDeviceSurfaceSupportKHR(
+            try check(vulkan_api.vkGetPhysicalDeviceSurfaceSupportKHR(
                 device,
                 @intCast(i),
                 surface,
@@ -212,10 +346,10 @@ fn selectPhysicalDevice(instance: c.VkInstance, surface: c.VkSurfaceKHR) !Select
 /// Returns true when the physical device exposes the requested device extension.
 fn hasDeviceExtension(device: c.VkPhysicalDevice, extension_name: [*:0]const u8) !bool {
     var count: u32 = 0;
-    try check(c.vkEnumerateDeviceExtensionProperties(device, null, &count, null));
+    try check(vulkan_api.vkEnumerateDeviceExtensionProperties(device, null, &count, null));
     const extensions = try allocator.alloc(c.VkExtensionProperties, count);
     defer allocator.free(extensions);
-    try check(c.vkEnumerateDeviceExtensionProperties(device, null, &count, extensions.ptr));
+    try check(vulkan_api.vkEnumerateDeviceExtensionProperties(device, null, &count, extensions.ptr));
     for (extensions) |extension| {
         if (std.mem.orderZ(u8, @ptrCast(&extension.extensionName), extension_name) == .eq) {
             return true;
@@ -249,22 +383,30 @@ fn createDevice(self: *Vulkan) !void {
         .ppEnabledExtensionNames = &extensions,
         .pEnabledFeatures = null,
     };
-    try check(c.vkCreateDevice(self.physical_device, &create_info, null, &self.device));
-    c.vkGetDeviceQueue(self.device, self.queue_family_index, 0, &self.graphics_queue);
+    try check(vulkan_api.vkCreateDevice(self.physical_device, &create_info, null, &self.device));
+    vulkan_api.vkDestroyDevice = try loadDeviceProc(
+        c.PFN_vkDestroyDevice,
+        vulkan_api.vkGetDeviceProcAddr,
+        self.device,
+        "vkDestroyDevice",
+    );
+    errdefer vulkan_api.vkDestroyDevice(self.device, null);
+    try vulkan_api.loadDevice(self.device);
+    vulkan_api.vkGetDeviceQueue(self.device, self.queue_family_index, 0, &self.graphics_queue);
     self.present_queue = self.graphics_queue;
 }
 
 /// Chooses surface settings, creates the swapchain, and stores its images.
 fn createSwapchain(self: *Vulkan, preferred_width: u32, preferred_height: u32) !void {
     var capabilities: c.VkSurfaceCapabilitiesKHR = undefined;
-    try check(c.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+    try check(vulkan_api.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
         self.physical_device,
         self.surface,
         &capabilities,
     ));
 
     var format_count: u32 = 0;
-    try check(c.vkGetPhysicalDeviceSurfaceFormatsKHR(
+    try check(vulkan_api.vkGetPhysicalDeviceSurfaceFormatsKHR(
         self.physical_device,
         self.surface,
         &format_count,
@@ -272,7 +414,7 @@ fn createSwapchain(self: *Vulkan, preferred_width: u32, preferred_height: u32) !
     ));
     const formats = try allocator.alloc(c.VkSurfaceFormatKHR, format_count);
     defer allocator.free(formats);
-    try check(c.vkGetPhysicalDeviceSurfaceFormatsKHR(
+    try check(vulkan_api.vkGetPhysicalDeviceSurfaceFormatsKHR(
         self.physical_device,
         self.surface,
         &format_count,
@@ -328,14 +470,14 @@ fn createSwapchain(self: *Vulkan, preferred_width: u32, preferred_height: u32) !
         .clipped = c.VK_TRUE,
         .oldSwapchain = null,
     };
-    try check(c.vkCreateSwapchainKHR(self.device, &create_info, null, &self.swapchain));
+    try check(vulkan_api.vkCreateSwapchainKHR(self.device, &create_info, null, &self.swapchain));
     self.swapchain_format = chosen_format.format;
     self.swapchain_extent = extent;
 
     var actual_count: u32 = 0;
-    try check(c.vkGetSwapchainImagesKHR(self.device, self.swapchain, &actual_count, null));
+    try check(vulkan_api.vkGetSwapchainImagesKHR(self.device, self.swapchain, &actual_count, null));
     self.swapchain_images = try allocator.alloc(c.VkImage, actual_count);
-    try check(c.vkGetSwapchainImagesKHR(
+    try check(vulkan_api.vkGetSwapchainImagesKHR(
         self.device,
         self.swapchain,
         &actual_count,
@@ -351,7 +493,7 @@ fn createCommands(self: *Vulkan) !void {
         .flags = c.VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         .queueFamilyIndex = self.queue_family_index,
     };
-    try check(c.vkCreateCommandPool(self.device, &pool_info, null, &self.command_pool));
+    try check(vulkan_api.vkCreateCommandPool(self.device, &pool_info, null, &self.command_pool));
 
     self.command_buffers = try allocator.alloc(c.VkCommandBuffer, self.swapchain_images.len);
     const alloc_info = c.VkCommandBufferAllocateInfo{
@@ -361,7 +503,7 @@ fn createCommands(self: *Vulkan) !void {
         .level = c.VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = @intCast(self.command_buffers.len),
     };
-    try check(c.vkAllocateCommandBuffers(self.device, &alloc_info, self.command_buffers.ptr));
+    try check(vulkan_api.vkAllocateCommandBuffers(self.device, &alloc_info, self.command_buffers.ptr));
 }
 
 /// Creates the semaphores and fences used to synchronize frames in flight.
@@ -377,16 +519,16 @@ fn createSyncObjects(self: *Vulkan) !void {
         .flags = c.VK_FENCE_CREATE_SIGNALED_BIT,
     };
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-        try check(c.vkCreateSemaphore(self.device, &semaphore_info, null, &self.image_available[i]));
-        try check(c.vkCreateSemaphore(self.device, &semaphore_info, null, &self.render_finished[i]));
-        try check(c.vkCreateFence(self.device, &fence_info, null, &self.in_flight[i]));
+        try check(vulkan_api.vkCreateSemaphore(self.device, &semaphore_info, null, &self.image_available[i]));
+        try check(vulkan_api.vkCreateSemaphore(self.device, &semaphore_info, null, &self.render_finished[i]));
+        try check(vulkan_api.vkCreateFence(self.device, &fence_info, null, &self.in_flight[i]));
     }
 }
 
 /// Acquires a swapchain image, records a clear command, submits it, and presents the image.
 pub fn drawFrame(self: *Vulkan) !bool {
     const frame = self.current_frame;
-    try check(c.vkWaitForFences(
+    try check(vulkan_api.vkWaitForFences(
         self.device,
         1,
         &self.in_flight[frame],
@@ -395,7 +537,7 @@ pub fn drawFrame(self: *Vulkan) !bool {
     ));
 
     var image_index: u32 = 0;
-    const acquire = c.vkAcquireNextImageKHR(
+    const acquire = vulkan_api.vkAcquireNextImageKHR(
         self.device,
         self.swapchain,
         std.math.maxInt(u64),
@@ -406,7 +548,7 @@ pub fn drawFrame(self: *Vulkan) !bool {
     if (acquire == c.VK_ERROR_OUT_OF_DATE_KHR) return true;
     try check(acquire);
 
-    try check(c.vkResetFences(self.device, 1, &self.in_flight[frame]));
+    try check(vulkan_api.vkResetFences(self.device, 1, &self.in_flight[frame]));
     try recordClearCommands(self.command_buffers[image_index], self.swapchain_images[image_index]);
 
     const wait_stages = [_]c.VkPipelineStageFlags{c.VK_PIPELINE_STAGE_TRANSFER_BIT};
@@ -421,7 +563,7 @@ pub fn drawFrame(self: *Vulkan) !bool {
         .signalSemaphoreCount = 1,
         .pSignalSemaphores = &self.render_finished[frame],
     };
-    try check(c.vkQueueSubmit(self.graphics_queue, 1, &submit_info, self.in_flight[frame]));
+    try check(vulkan_api.vkQueueSubmit(self.graphics_queue, 1, &submit_info, self.in_flight[frame]));
 
     const present_info = c.VkPresentInfoKHR{
         .sType = c.VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -433,7 +575,7 @@ pub fn drawFrame(self: *Vulkan) !bool {
         .pImageIndices = &image_index,
         .pResults = null,
     };
-    const present = c.vkQueuePresentKHR(self.present_queue, &present_info);
+    const present = vulkan_api.vkQueuePresentKHR(self.present_queue, &present_info);
     const needs_recreate = present == c.VK_ERROR_OUT_OF_DATE_KHR or present == c.VK_SUBOPTIMAL_KHR;
     if (!needs_recreate) try check(present);
 
@@ -443,14 +585,14 @@ pub fn drawFrame(self: *Vulkan) !bool {
 
 /// Records commands that transition a swapchain image, clear it, and prepare it for presentation.
 fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !void {
-    try check(c.vkResetCommandBuffer(command_buffer, 0));
+    try check(vulkan_api.vkResetCommandBuffer(command_buffer, 0));
     const begin_info = c.VkCommandBufferBeginInfo{
         .sType = c.VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pNext = null,
         .flags = 0,
         .pInheritanceInfo = null,
     };
-    try check(c.vkBeginCommandBuffer(command_buffer, &begin_info));
+    try check(vulkan_api.vkBeginCommandBuffer(command_buffer, &begin_info));
 
     imageBarrier(
         command_buffer,
@@ -471,7 +613,7 @@ fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !voi
         .baseArrayLayer = 0,
         .layerCount = 1,
     };
-    c.vkCmdClearColorImage(
+    vulkan_api.vkCmdClearColorImage(
         command_buffer,
         image,
         c.VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -491,7 +633,7 @@ fn recordClearCommands(command_buffer: c.VkCommandBuffer, image: c.VkImage) !voi
         c.VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
     );
 
-    try check(c.vkEndCommandBuffer(command_buffer));
+    try check(vulkan_api.vkEndCommandBuffer(command_buffer));
 }
 
 /// Emits an image memory barrier for layout transitions and access synchronization.
@@ -523,7 +665,7 @@ fn imageBarrier(
             .layerCount = 1,
         },
     };
-    c.vkCmdPipelineBarrier(command_buffer, src_stage, dst_stage, 0, 0, null, 0, null, 1, &barrier);
+    vulkan_api.vkCmdPipelineBarrier(command_buffer, src_stage, dst_stage, 0, 0, null, 0, null, 1, &barrier);
 }
 
 /// Converts non-success Vulkan result codes into a Zig error.
