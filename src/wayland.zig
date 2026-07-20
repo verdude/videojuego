@@ -1,0 +1,223 @@
+const std = @import("std");
+const mem = std.mem;
+
+const wayland = @import("wayland");
+const wl = wayland.client.wl;
+const xdg = wayland.client.xdg;
+
+const allocator = std.heap.page_allocator;
+const MIN_WIDTH: i32 = 960;
+const MIN_HEIGHT: i32 = 540;
+
+const Globals = struct {
+    compositor: ?*wl.Compositor,
+    wm_base: ?*xdg.WmBase,
+};
+
+pub const Window = struct {
+    display: *wl.Display,
+    surface: *wl.Surface,
+
+    compositor: *wl.Compositor,
+    wm_base: *xdg.WmBase,
+    xdg_surface: *xdg.Surface,
+    xdg_toplevel: *xdg.Toplevel,
+
+    configured: bool,
+    running: bool,
+
+    width: i32,
+    height: i32,
+    resize_pending: bool,
+    pending_width: i32,
+    pending_height: i32,
+
+    pub const Extent = struct {
+        width: u32,
+        height: u32,
+    };
+
+    pub fn init() anyerror!*Window {
+        var transferred = false;
+
+        const display = try wl.Display.connect(null);
+        errdefer if (!transferred) display.disconnect();
+
+        const registry = try display.getRegistry();
+        defer registry.destroy();
+
+        var globals = Globals{
+            .compositor = null,
+            .wm_base = null,
+        };
+
+        registry.setListener(*Globals, registryListener, &globals);
+        if (display.roundtrip() != .SUCCESS) return error.RoundtripFailed;
+
+        const compositor = globals.compositor orelse return error.NoWlCompositor;
+        errdefer if (!transferred) compositor.destroy();
+        const wm_base = globals.wm_base orelse return error.NoXdgWmBase;
+        errdefer if (!transferred) wm_base.destroy();
+
+        const surface = try compositor.createSurface();
+        errdefer if (!transferred) surface.destroy();
+        const xdg_surface = try wm_base.getXdgSurface(surface);
+        errdefer if (!transferred) xdg_surface.destroy();
+        const xdg_toplevel = try xdg_surface.getToplevel();
+        errdefer if (!transferred) xdg_toplevel.destroy();
+        xdg_toplevel.setMinSize(MIN_WIDTH, MIN_HEIGHT);
+
+        const window = try allocator.create(Window);
+        errdefer if (transferred) window.deinit() else allocator.destroy(window);
+
+        window.* = .{
+            .display = display,
+            .surface = surface,
+            .compositor = compositor,
+            .wm_base = wm_base,
+            .xdg_surface = xdg_surface,
+            .xdg_toplevel = xdg_toplevel,
+            .configured = false,
+            .running = true,
+            .width = MIN_WIDTH,
+            .height = MIN_HEIGHT,
+            .resize_pending = false,
+            .pending_width = MIN_WIDTH,
+            .pending_height = MIN_HEIGHT,
+        };
+        transferred = true;
+
+        wm_base.setListener(*Window, xdgWmBaseListener, window);
+        xdg_surface.setListener(*Window, xdgSurfaceListener, window);
+        xdg_toplevel.setListener(*Window, xdgToplevelListener, window);
+
+        surface.commit();
+        while (!window.configured) {
+            if (display.dispatch() != .SUCCESS) return error.DispatchFailed;
+        }
+
+        return window;
+    }
+
+    /// Reads and dispatches any Wayland events that are currently available.
+    pub fn pollEvents(self: *Window) !void {
+        while (!self.display.prepareRead()) {
+            if (self.display.dispatchPending() != .SUCCESS) return error.DispatchFailed;
+        }
+
+        const flush_result = self.display.flush();
+        if (flush_result != .SUCCESS and flush_result != .AGAIN) {
+            self.display.cancelRead();
+            return error.FlushFailed;
+        }
+
+        var poll_fds = [_]std.posix.pollfd{.{
+            .fd = self.display.getFd(),
+            .events = std.posix.POLL.IN,
+            .revents = 0,
+        }};
+        const ready = std.posix.poll(&poll_fds, 0) catch |err| {
+            self.display.cancelRead();
+            return err;
+        };
+
+        if (ready == 0 or (poll_fds[0].revents & std.posix.POLL.IN) == 0) {
+            self.display.cancelRead();
+            if ((poll_fds[0].revents &
+                (std.posix.POLL.ERR | std.posix.POLL.HUP | std.posix.POLL.NVAL)) != 0)
+            {
+                return error.DisplayDisconnected;
+            }
+            return;
+        }
+
+        if (self.display.readEvents() != .SUCCESS) return error.ReadEventsFailed;
+        if (self.display.dispatchPending() != .SUCCESS) return error.DispatchFailed;
+    }
+
+    /// Applies and returns the latest pending window size, if it changed.
+    pub fn takeResize(self: *Window) ?Extent {
+        if (!self.resize_pending) return null;
+
+        self.resize_pending = false;
+        self.width = self.pending_width;
+        self.height = self.pending_height;
+        return .{
+            .width = @intCast(self.width),
+            .height = @intCast(self.height),
+        };
+    }
+
+    pub fn deinit(self: *Window) void {
+        self.xdg_toplevel.destroy();
+        self.xdg_surface.destroy();
+        self.surface.destroy();
+        self.wm_base.destroy();
+        self.compositor.destroy();
+        self.display.disconnect();
+        allocator.destroy(self);
+    }
+
+    fn registryListener(registry: *wl.Registry, event: wl.Registry.Event, globals: *Globals) void {
+        switch (event) {
+            .global => |global| {
+                if (mem.orderZ(u8, global.interface, wl.Compositor.interface.name) == .eq) {
+                    globals.compositor = registry.bind(global.name, wl.Compositor, 1) catch return;
+                } else if (mem.orderZ(u8, global.interface, xdg.WmBase.interface.name) == .eq) {
+                    globals.wm_base = registry.bind(global.name, xdg.WmBase, 1) catch return;
+                }
+            },
+            .global_remove => {},
+        }
+    }
+
+    fn xdgWmBaseListener(wm_base: *xdg.WmBase, event: xdg.WmBase.Event, window: *Window) void {
+        _ = window;
+
+        switch (event) {
+            .ping => |ping| wm_base.pong(ping.serial),
+        }
+    }
+
+    fn xdgSurfaceListener(
+        xdg_surface: *xdg.Surface,
+        event: xdg.Surface.Event,
+        window: *Window,
+    ) void {
+        switch (event) {
+            .configure => |configure| {
+                xdg_surface.ackConfigure(configure.serial);
+
+                if (!window.configured) {
+                    window.configured = true;
+                    window.resize_pending = true;
+                    return;
+                }
+
+                if (window.pending_width != window.width or
+                    window.pending_height != window.height)
+                {
+                    window.resize_pending = true;
+                }
+            },
+        }
+    }
+
+    fn xdgToplevelListener(
+        topLevel: *xdg.Toplevel,
+        event: xdg.Toplevel.Event,
+        window: *Window,
+    ) void {
+        _ = topLevel;
+
+        switch (event) {
+            .configure => |configure| {
+                if (configure.width > 0 and configure.height > 0) {
+                    window.pending_width = @max(configure.width, MIN_WIDTH);
+                    window.pending_height = @max(configure.height, MIN_HEIGHT);
+                }
+            },
+            .close => window.running = false,
+        }
+    }
+};

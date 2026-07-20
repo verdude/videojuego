@@ -50,7 +50,11 @@ in_flight: [MAX_FRAMES_IN_FLIGHT]c.VkFence,
 current_frame: usize,
 
 /// Allocates and initializes all Vulkan resources needed to render into a Wayland window.
-pub fn init(window: *wm.Window) !*Vulkan {
+pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
+    const window = switch (window_manager.backend) {
+        .wayland => |window| window,
+    };
+
     const self = try allocator.create(Vulkan);
     errdefer allocator.destroy(self);
     self.* = undefined;

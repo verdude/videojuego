@@ -1,43 +1,39 @@
-const std = @import("std");
-
-const Window = @import("./window_manager.zig").Window;
+const WindowManager = @import("./window_manager.zig");
 const Vulkan = @import("./vulkan.zig");
 
 const Jueguito = @This();
 
-window: *Window,
+window_manager: WindowManager,
 // TODO: generic renderer
 renderer: *Vulkan,
 
 pub fn init() !Jueguito {
-    const window = try Window.init();
-    errdefer window.deinit();
+    var window_manager = try WindowManager.init(.wayland);
+    errdefer window_manager.deinit();
 
     return .{
-        .window = window,
-        .renderer = try Vulkan.init(window),
+        .window_manager = window_manager,
+        .renderer = try Vulkan.init(&window_manager),
     };
 }
 
 /// Game loop
 pub fn wan(self: *Jueguito) !void {
-    while (self.window.running) {
-        try self.window.pollEvents();
+    while (self.window_manager.isRunning()) {
+        try self.window_manager.pollEvents();
 
-        if (self.window.takeResize()) |extent| {
+        if (self.window_manager.takeResize()) |extent| {
             try self.renderer.recreateSwapchain(extent.width, extent.height);
         }
 
         if (try self.renderer.drawFrame()) {
-            try self.renderer.recreateSwapchain(
-                @intCast(self.window.width),
-                @intCast(self.window.height),
-            );
+            const extent = self.window_manager.extent();
+            try self.renderer.recreateSwapchain(extent.width, extent.height);
         }
     }
 }
 
 pub fn deinit(self: *Jueguito) void {
     self.renderer.deinit();
-    self.window.deinit();
+    self.window_manager.deinit();
 }
