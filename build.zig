@@ -17,18 +17,26 @@ pub fn build(b: *std.Build) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
+    const vulkan_sdk = b.option(
+        []const u8,
+        "vulkan-sdk",
+        "Path to the Vulkan SDK (uses Include and Lib on Windows)",
+    ) orelse b.graph.environ_map.get("VULKAN_SDK");
 
-    const scanner = Scanner.create(b, .{});
+    const is_windows = target.result.os.tag == .windows;
+    const wayland = if (!is_windows) blk: {
+        const scanner = Scanner.create(b, .{});
+        const module = b.createModule(.{ .root_source_file = scanner.result });
 
-    const wayland = b.createModule(.{ .root_source_file = scanner.result });
+        scanner.addSystemProtocol("stable/xdg-shell/xdg-shell.xml");
 
-    scanner.addSystemProtocol("stable/xdg-shell/xdg-shell.xml");
-
-    // Pass the maximum version implemented by your wayland server or client.
-    // Requests, events, enums, etc. from newer versions will not be generated,
-    // ensuring forwards compatibility with newer protocol xml.
-    scanner.generate("wl_compositor", 1);
-    scanner.generate("xdg_wm_base", 1);
+        // Pass the maximum version implemented by your wayland server or client.
+        // Requests, events, enums, etc. from newer versions will not be generated,
+        // ensuring forwards compatibility with newer protocol xml.
+        scanner.generate("wl_compositor", 1);
+        scanner.generate("xdg_wm_base", 1);
+        break :blk module;
+    } else null;
 
     // It's also possible to define more custom flags to toggle optional features
     // of this build script using `b.option()`. All defined flags (including
@@ -99,9 +107,27 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    exe.root_module.addImport("wayland", wayland);
-    exe.root_module.linkSystemLibrary("wayland-client", .{});
-    exe.root_module.linkSystemLibrary("vulkan", .{});
+    if (wayland) |module| {
+        exe.root_module.link_libc = true;
+        exe.root_module.addImport("wayland", module);
+        exe.root_module.linkSystemLibrary("wayland-client", .{});
+        exe.root_module.linkSystemLibrary("vulkan", .{});
+    } else {
+        exe.root_module.link_libc = true;
+        if (vulkan_sdk) |sdk| {
+            exe.root_module.addIncludePath(.{
+                .cwd_relative = b.pathJoin(&.{ sdk, "Include" }),
+            });
+            const lib_dir = if (target.result.cpu.arch == .x86) "Lib32" else "Lib";
+            exe.root_module.addLibraryPath(.{
+                .cwd_relative = b.pathJoin(&.{ sdk, lib_dir }),
+            });
+        }
+        exe.root_module.linkSystemLibrary("kernel32", .{});
+        exe.root_module.linkSystemLibrary("user32", .{});
+        exe.root_module.linkSystemLibrary("gdi32", .{});
+        exe.root_module.linkSystemLibrary("vulkan-1", .{});
+    }
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default

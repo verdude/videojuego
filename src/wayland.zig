@@ -5,6 +5,12 @@ const wayland = @import("wayland");
 const wl = wayland.client.wl;
 const xdg = wayland.client.xdg;
 
+const vk = @cImport({
+    @cDefine("VK_USE_PLATFORM_WAYLAND_KHR", "1");
+    @cInclude("vulkan/vulkan.h");
+    @cInclude("wayland-client.h");
+});
+
 const allocator = std.heap.page_allocator;
 const MIN_WIDTH: i32 = 960;
 const MIN_HEIGHT: i32 = 540;
@@ -148,6 +154,30 @@ pub const Window = struct {
         };
     }
 
+    pub fn canRender(self: *const Window) bool {
+        return self.running and self.width > 0 and self.height > 0;
+    }
+
+    pub fn vulkanSurfaceExtension(_: *const Window) [*:0]const u8 {
+        return "VK_KHR_wayland_surface";
+    }
+
+    pub fn createVulkanSurface(self: *const Window, instance_handle: u64) !u64 {
+        const instance = vulkanHandleFromU64(vk.VkInstance, instance_handle);
+        const create_info = vk.VkWaylandSurfaceCreateInfoKHR{
+            .sType = vk.VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
+            .pNext = null,
+            .flags = 0,
+            .display = @ptrCast(self.display),
+            .surface = @ptrCast(self.surface),
+        };
+        var surface: vk.VkSurfaceKHR = std.mem.zeroes(vk.VkSurfaceKHR);
+        if (vk.vkCreateWaylandSurfaceKHR(instance, &create_info, null, &surface) != vk.VK_SUCCESS) {
+            return error.VulkanSurfaceCreationFailed;
+        }
+        return vulkanHandleToU64(surface);
+    }
+
     pub fn deinit(self: *Window) void {
         self.xdg_toplevel.destroy();
         self.xdg_surface.destroy();
@@ -156,6 +186,22 @@ pub const Window = struct {
         self.compositor.destroy();
         self.display.disconnect();
         allocator.destroy(self);
+    }
+
+    fn vulkanHandleFromU64(comptime Handle: type, value: u64) Handle {
+        return switch (@typeInfo(Handle)) {
+            .optional, .pointer => @ptrFromInt(@as(usize, @intCast(value))),
+            .int => @intCast(value),
+            else => @compileError("unsupported Vulkan handle representation"),
+        };
+    }
+
+    fn vulkanHandleToU64(handle: anytype) u64 {
+        return switch (@typeInfo(@TypeOf(handle))) {
+            .optional, .pointer => @intFromPtr(handle),
+            .int => @intCast(handle),
+            else => @compileError("unsupported Vulkan handle representation"),
+        };
     }
 
     fn registryListener(registry: *wl.Registry, event: wl.Registry.Event, globals: *Globals) void {

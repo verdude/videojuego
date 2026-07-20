@@ -1,12 +1,8 @@
 const std = @import("std");
 const wm = @import("./window_manager.zig");
-const wayland = @import("wayland");
-const wl = wayland.client.wl;
 
 const c = @cImport({
-    @cDefine("VK_USE_PLATFORM_WAYLAND_KHR", "1");
     @cInclude("vulkan/vulkan.h");
-    @cInclude("wayland-client.h");
 });
 
 const allocator = std.heap.page_allocator;
@@ -16,7 +12,7 @@ const Vulkan = @This();
 
 /// The top-level Vulkan instance used to load global Vulkan functionality.
 instance: c.VkInstance,
-/// The Vulkan presentation surface created from the Wayland display and surface.
+/// The Vulkan presentation surface created by the selected window backend.
 surface: c.VkSurfaceKHR,
 /// The selected GPU that supports graphics, presentation, and swapchains.
 physical_device: c.VkPhysicalDevice,
@@ -26,9 +22,9 @@ device: c.VkDevice,
 queue_family_index: u32,
 /// The queue that submits graphics and transfer command buffers.
 graphics_queue: c.VkQueue,
-/// The queue that presents rendered swapchain images to the Wayland surface.
+/// The queue that presents rendered swapchain images to the native surface.
 present_queue: c.VkQueue,
-/// The swapchain that owns the presentable images for the Wayland surface.
+/// The swapchain that owns the presentable images for the native surface.
 swapchain: c.VkSwapchainKHR,
 /// The image format selected for swapchain images.
 swapchain_format: c.VkFormat,
@@ -49,11 +45,9 @@ in_flight: [MAX_FRAMES_IN_FLIGHT]c.VkFence,
 /// The rotating frame slot used to index synchronization objects.
 current_frame: usize,
 
-/// Allocates and initializes all Vulkan resources needed to render into a Wayland window.
+/// Allocates and initializes all Vulkan resources needed to render into a native window.
 pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
-    const window = switch (window_manager.backend) {
-        .wayland => |window| window,
-    };
+    const initial_extent = window_manager.extent();
 
     const self = try allocator.create(Vulkan);
     errdefer allocator.destroy(self);
@@ -65,10 +59,11 @@ pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
     self.render_finished = [_]c.VkSemaphore{null} ** MAX_FRAMES_IN_FLIGHT;
     self.in_flight = [_]c.VkFence{null} ** MAX_FRAMES_IN_FLIGHT;
 
-    self.instance = try createInstance();
+    self.instance = try createInstance(window_manager.vulkanSurfaceExtension());
     errdefer _ = c.vkDestroyInstance(self.instance, null);
 
-    self.surface = try createWaylandSurface(self.instance, window.display, window.surface);
+    const surface_handle = try window_manager.createVulkanSurface(@intFromPtr(self.instance));
+    self.surface = vulkanHandleFromU64(c.VkSurfaceKHR, surface_handle);
     errdefer c.vkDestroySurfaceKHR(self.instance, self.surface, null);
 
     const selected = try selectPhysicalDevice(self.instance, self.surface);
@@ -78,7 +73,7 @@ pub fn init(window_manager: *wm.WindowManager) !*Vulkan {
     try self.createDevice();
     errdefer c.vkDestroyDevice(self.device, null);
 
-    try self.createSwapchain(@intCast(window.width), @intCast(window.height));
+    try self.createSwapchain(initial_extent.width, initial_extent.height);
     errdefer c.vkDestroySwapchainKHR(self.device, self.swapchain, null);
 
     try self.createCommands();
@@ -114,7 +109,7 @@ pub fn deinit(self: *Vulkan) void {
     allocator.destroy(self);
 }
 
-/// Recreates swapchain-dependent resources after the Wayland window changes size.
+/// Recreates swapchain-dependent resources after the native window changes size.
 pub fn recreateSwapchain(self: *Vulkan, width: u32, height: u32) !void {
     _ = c.vkDeviceWaitIdle(self.device);
     self.destroySwapchainResources();
@@ -142,8 +137,8 @@ fn destroySwapchainResources(self: *Vulkan) void {
     }
 }
 
-/// Creates a Vulkan instance with the Wayland surface extensions enabled.
-fn createInstance() !c.VkInstance {
+/// Creates a Vulkan instance with the selected platform's surface extensions enabled.
+fn createInstance(platform_surface_extension: [*:0]const u8) !c.VkInstance {
     const app_info = c.VkApplicationInfo{
         .sType = c.VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .pNext = null,
@@ -155,7 +150,7 @@ fn createInstance() !c.VkInstance {
     };
     const extensions = [_][*:0]const u8{
         c.VK_KHR_SURFACE_EXTENSION_NAME,
-        c.VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
+        platform_surface_extension,
     };
     const create_info = c.VkInstanceCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -170,24 +165,6 @@ fn createInstance() !c.VkInstance {
     var instance: c.VkInstance = null;
     try check(c.vkCreateInstance(&create_info, null, &instance));
     return instance;
-}
-
-/// Creates a Vulkan surface from the provided Wayland display and surface handles.
-fn createWaylandSurface(
-    instance: c.VkInstance,
-    display: *wl.Display,
-    surface: *wl.Surface,
-) !c.VkSurfaceKHR {
-    const create_info = c.VkWaylandSurfaceCreateInfoKHR{
-        .sType = c.VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
-        .pNext = null,
-        .flags = 0,
-        .display = @ptrCast(display),
-        .surface = @ptrCast(surface),
-    };
-    var vk_surface: c.VkSurfaceKHR = null;
-    try check(c.vkCreateWaylandSurfaceKHR(instance, &create_info, null, &vk_surface));
-    return vk_surface;
 }
 
 const SelectedDevice = struct {
@@ -550,6 +527,14 @@ fn imageBarrier(
 }
 
 /// Converts non-success Vulkan result codes into a Zig error.
+fn vulkanHandleFromU64(comptime Handle: type, value: u64) Handle {
+    return switch (@typeInfo(Handle)) {
+        .optional, .pointer => @ptrFromInt(@as(usize, @intCast(value))),
+        .int => @intCast(value),
+        else => @compileError("unsupported Vulkan handle representation"),
+    };
+}
+
 fn check(result: c.VkResult) !void {
     if (result != c.VK_SUCCESS) return error.VulkanError;
 }
