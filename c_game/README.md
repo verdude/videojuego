@@ -1,7 +1,7 @@
 # ECS Text Simulation
 
-A small, dependency-free C11 game scaffold built around a reusable entity
-component system. The included game is a turn-based terminal ecosystem:
+A small C11 game scaffold built with the [Flecs](https://www.flecs.dev/flecs/)
+entity component system. The included game is a turn-based terminal ecosystem:
 plants grow, grazers seek food, spend energy, reproduce, and eventually die.
 
 The simulation is deliberately simple. It is a working slice for adding new
@@ -9,7 +9,8 @@ components and systems without tying the project to a rendering framework.
 
 ## Build and run
 
-Requirements: a C11 compiler and CMake 3.16 or newer.
+Requirements: a C11 compiler, Git, and CMake 3.16 or newer. The first configure
+downloads the pinned Flecs 4.1.5 release through CMake's `FetchContent`.
 
 ```sh
 cmake -S . -B build
@@ -42,12 +43,12 @@ ctest --test-dir build-sanitize --output-on-failure
 
 ## Structure
 
-- `include/ecs.h`, `src/ecs.c` — generation-safe entities, up to 64 registered
-  component types, component storage, and mask-based queries.
-- `include/simulation.h`, `src/simulation.c` — game components and systems.
+- `CMakeLists.txt` — downloads and links the pinned Flecs static library.
+- `include/simulation.h`, `src/simulation.c` — Flecs components, queries, and
+  game systems.
 - `src/main.c` — terminal command loop and batch-mode entry point.
-- `tests/` — focused ECS lifecycle/query tests and a simulation smoke test.
+- `tests/` — simulation smoke tests.
 
 Components contain state only. Behavior lives in systems that query for the
-component combinations they need. Destroyed entity slots are recycled, while
-generation counters keep stale handles invalid.
+component combinations they need. Flecs supplies archetype storage, query
+iteration, entity recycling, and generation-safe handles.

@@ -1,6 +1,6 @@
 #include "simulation.h"
 
-#include "ecs.h"
+#include <flecs.h>
 
 #include <inttypes.h>
 #include <limits.h>
@@ -34,12 +34,16 @@ typedef struct {
 } Grazer;
 
 struct Simulation {
-    EcsWorld *world;
-    EcsComponent position;
-    EcsComponent appearance;
-    EcsComponent plant;
-    EcsComponent grazer;
-    EcsEntity *actor_snapshot;
+    ecs_world_t *world;
+    ecs_entity_t position;
+    ecs_entity_t appearance;
+    ecs_entity_t plant;
+    ecs_entity_t grazer;
+    ecs_query_t *positions;
+    ecs_query_t *plants;
+    ecs_query_t *grazers;
+    ecs_query_t *renderables;
+    ecs_entity_t *actor_snapshot;
     char *grid;
     int width;
     int height;
@@ -63,53 +67,54 @@ static int random_coordinate(Simulation *simulation, int limit)
     return (int)(random_next(simulation) % (uint32_t)limit);
 }
 
-static uint64_t component_pair(EcsComponent first, EcsComponent second)
+static bool entity_is_alive(const Simulation *simulation, ecs_entity_t entity)
 {
-    return ecs_component_mask(first) | ecs_component_mask(second);
+    return entity != 0u && ecs_is_alive(simulation->world, entity);
 }
 
-static EcsEntity entity_at(
-    Simulation *simulation,
-    int x,
-    int y,
-    EcsComponent kind
-)
+static size_t query_count(Simulation *simulation, const ecs_query_t *query)
 {
-    EcsIterator iterator = ecs_query(
-        simulation->world,
-        component_pair(simulation->position, kind)
-    );
-    EcsEntity entity;
+    ecs_iter_t iterator = ecs_query_iter(simulation->world, query);
+    size_t count = 0u;
 
-    while (ecs_query_next(&iterator, &entity)) {
-        const Position *position = ecs_component_get_const(
-            simulation->world,
-            entity,
-            simulation->position
-        );
-        if (position->x == x && position->y == y) {
-            return entity;
+    while (ecs_query_next(&iterator)) {
+        count += (size_t)iterator.count;
+    }
+    return count;
+}
+
+static ecs_entity_t plant_at(Simulation *simulation, int x, int y)
+{
+    ecs_iter_t iterator = ecs_query_iter(simulation->world, simulation->plants);
+
+    while (ecs_query_next(&iterator)) {
+        const Position *positions = ecs_field(&iterator, Position, 0);
+        int32_t index;
+
+        for (index = 0; index < iterator.count; ++index) {
+            if (positions[index].x == x && positions[index].y == y) {
+                ecs_entity_t entity = iterator.entities[index];
+                ecs_iter_fini(&iterator);
+                return entity;
+            }
         }
     }
-    return ECS_ENTITY_INVALID;
+    return 0u;
 }
 
 static bool cell_is_open(Simulation *simulation, int x, int y)
 {
-    EcsIterator iterator = ecs_query(
-        simulation->world,
-        ecs_component_mask(simulation->position)
-    );
-    EcsEntity entity;
+    ecs_iter_t iterator = ecs_query_iter(simulation->world, simulation->positions);
 
-    while (ecs_query_next(&iterator, &entity)) {
-        const Position *position = ecs_component_get_const(
-            simulation->world,
-            entity,
-            simulation->position
-        );
-        if (position->x == x && position->y == y) {
-            return false;
+    while (ecs_query_next(&iterator)) {
+        const Position *positions = ecs_field(&iterator, Position, 0);
+        int32_t index;
+
+        for (index = 0; index < iterator.count; ++index) {
+            if (positions[index].x == x && positions[index].y == y) {
+                ecs_iter_fini(&iterator);
+                return false;
+            }
         }
     }
     return true;
@@ -132,104 +137,111 @@ static bool find_open_cell(Simulation *simulation, int *x, int *y)
     return false;
 }
 
-static EcsEntity spawn_plant_at(Simulation *simulation, int x, int y)
+static ecs_entity_t spawn_plant_at(Simulation *simulation, int x, int y)
 {
-    EcsEntity entity = ECS_ENTITY_INVALID;
-    Position *position;
-    Appearance *appearance;
-    Plant *plant;
+    ecs_entity_t entity;
+    Position position = {x, y};
+    Appearance appearance = {'*'};
+    Plant plant = {PLANT_NUTRITION};
 
-    if (!cell_is_open(simulation, x, y)) {
-        return entity;
+    if (query_count(simulation, simulation->positions) >= SIMULATION_CAPACITY ||
+        !cell_is_open(simulation, x, y)) {
+        return 0u;
     }
 
-    entity = ecs_entity_create(simulation->world);
-    if (!ecs_entity_is_alive(simulation->world, entity)) {
-        return ECS_ENTITY_INVALID;
-    }
-
-    position = ecs_component_add(simulation->world, entity, simulation->position);
-    appearance = ecs_component_add(simulation->world, entity, simulation->appearance);
-    plant = ecs_component_add(simulation->world, entity, simulation->plant);
-    if (position == NULL || appearance == NULL || plant == NULL) {
-        ecs_entity_destroy(simulation->world, entity);
-        return ECS_ENTITY_INVALID;
-    }
-
-    position->x = x;
-    position->y = y;
-    appearance->glyph = '*';
-    plant->nutrition = PLANT_NUTRITION;
+    entity = ecs_new(simulation->world);
+    ecs_set_id(
+        simulation->world,
+        entity,
+        simulation->position,
+        sizeof(position),
+        &position
+    );
+    ecs_set_id(
+        simulation->world,
+        entity,
+        simulation->appearance,
+        sizeof(appearance),
+        &appearance
+    );
+    ecs_set_id(
+        simulation->world,
+        entity,
+        simulation->plant,
+        sizeof(plant),
+        &plant
+    );
     return entity;
 }
 
-static EcsEntity spawn_grazer_at(
+static ecs_entity_t spawn_grazer_at(
     Simulation *simulation,
     int x,
     int y,
     int starting_energy
 )
 {
-    EcsEntity entity = ECS_ENTITY_INVALID;
-    Position *position;
-    Appearance *appearance;
-    Grazer *grazer;
+    ecs_entity_t entity;
+    Position position = {x, y};
+    Appearance appearance = {'g'};
+    Grazer grazer = {starting_energy, 0};
 
-    if (!cell_is_open(simulation, x, y)) {
-        return entity;
+    if (query_count(simulation, simulation->positions) >= SIMULATION_CAPACITY ||
+        !cell_is_open(simulation, x, y)) {
+        return 0u;
     }
 
-    entity = ecs_entity_create(simulation->world);
-    if (!ecs_entity_is_alive(simulation->world, entity)) {
-        return ECS_ENTITY_INVALID;
-    }
-
-    position = ecs_component_add(simulation->world, entity, simulation->position);
-    appearance = ecs_component_add(simulation->world, entity, simulation->appearance);
-    grazer = ecs_component_add(simulation->world, entity, simulation->grazer);
-    if (position == NULL || appearance == NULL || grazer == NULL) {
-        ecs_entity_destroy(simulation->world, entity);
-        return ECS_ENTITY_INVALID;
-    }
-
-    position->x = x;
-    position->y = y;
-    appearance->glyph = 'g';
-    grazer->energy = starting_energy;
-    grazer->age = 0;
+    entity = ecs_new(simulation->world);
+    ecs_set_id(
+        simulation->world,
+        entity,
+        simulation->position,
+        sizeof(position),
+        &position
+    );
+    ecs_set_id(
+        simulation->world,
+        entity,
+        simulation->appearance,
+        sizeof(appearance),
+        &appearance
+    );
+    ecs_set_id(
+        simulation->world,
+        entity,
+        simulation->grazer,
+        sizeof(grazer),
+        &grazer
+    );
     return entity;
 }
 
-static EcsEntity nearest_plant(
+static ecs_entity_t nearest_plant(
     Simulation *simulation,
     const Position *origin,
     int *distance_x,
     int *distance_y
 )
 {
-    EcsIterator iterator = ecs_query(
-        simulation->world,
-        component_pair(simulation->position, simulation->plant)
-    );
-    EcsEntity entity;
-    EcsEntity nearest = ECS_ENTITY_INVALID;
+    ecs_iter_t iterator = ecs_query_iter(simulation->world, simulation->plants);
+    ecs_entity_t nearest = 0u;
     int nearest_distance = INT_MAX;
 
-    while (ecs_query_next(&iterator, &entity)) {
-        const Position *position = ecs_component_get_const(
-            simulation->world,
-            entity,
-            simulation->position
-        );
-        int dx = position->x - origin->x;
-        int dy = position->y - origin->y;
-        int distance = abs(dx) + abs(dy);
+    while (ecs_query_next(&iterator)) {
+        const Position *positions = ecs_field(&iterator, Position, 0);
+        int32_t index;
 
-        if (distance < nearest_distance) {
-            nearest = entity;
-            nearest_distance = distance;
-            *distance_x = dx;
-            *distance_y = dy;
+        for (index = 0; index < iterator.count; ++index) {
+            int dx = positions[index].x - origin->x;
+            int dy = positions[index].y - origin->y;
+            int distance = abs(dx) + abs(dy);
+
+            if (distance < nearest_distance) {
+                nearest = iterator.entities[index];
+                nearest_distance = distance;
+                *distance_x = dx;
+                *distance_y = dy;
+            }
         }
     }
     return nearest;
@@ -244,9 +256,9 @@ static void move_grazer(Simulation *simulation, Position *position)
 {
     int dx = 0;
     int dy = 0;
-    EcsEntity food = nearest_plant(simulation, position, &dx, &dy);
+    ecs_entity_t food = nearest_plant(simulation, position, &dx, &dy);
 
-    if (ecs_entity_is_alive(simulation->world, food)) {
+    if (entity_is_alive(simulation, food)) {
         if (abs(dx) > abs(dy)) {
             dx = sign_of(dx);
             dy = 0;
@@ -269,52 +281,69 @@ static void move_grazer(Simulation *simulation, Position *position)
     position->y = (position->y + dy + simulation->height) % simulation->height;
 }
 
-static void eat_plant(Simulation *simulation, Position *position, Grazer *grazer)
+static int eat_plant(Simulation *simulation, const Position *position)
 {
-    EcsEntity plant_entity = entity_at(
-        simulation,
-        position->x,
-        position->y,
-        simulation->plant
-    );
+    ecs_entity_t plant_entity = plant_at(simulation, position->x, position->y);
     const Plant *plant;
+    int nutrition;
 
-    if (!ecs_entity_is_alive(simulation->world, plant_entity)) {
-        return;
+    if (!entity_is_alive(simulation, plant_entity)) {
+        return 0;
     }
 
-    plant = ecs_component_get_const(simulation->world, plant_entity, simulation->plant);
-    grazer->energy += plant->nutrition;
-    ecs_entity_destroy(simulation->world, plant_entity);
+    plant = ecs_get_id(simulation->world, plant_entity, simulation->plant);
+    nutrition = plant->nutrition;
+    ecs_delete(simulation->world, plant_entity);
+    return nutrition;
 }
 
-static void reproduce_grazer(
-    Simulation *simulation,
-    Position *position,
-    Grazer *grazer
-)
+static void reproduce_grazer(Simulation *simulation, ecs_entity_t entity)
 {
     static const int neighbors[4][2] = {
         {1, 0}, {-1, 0}, {0, 1}, {0, -1}
     };
-    unsigned start = random_next(simulation) % 4u;
+    const Position *position_component = ecs_get_id(
+        simulation->world,
+        entity,
+        simulation->position
+    );
+    const Grazer *grazer_component = ecs_get_id(
+        simulation->world,
+        entity,
+        simulation->grazer
+    );
+    Position position;
+    int energy;
+    unsigned start;
     unsigned offset;
 
-    if (grazer->energy < GRAZER_REPRODUCTION_ENERGY) {
+    if (position_component == NULL || grazer_component == NULL) {
+        return;
+    }
+    position = *position_component;
+    energy = grazer_component->energy;
+    if (energy < GRAZER_REPRODUCTION_ENERGY) {
         return;
     }
 
+    start = random_next(simulation) % 4u;
     for (offset = 0u; offset < 4u; ++offset) {
         unsigned neighbor = (start + offset) % 4u;
-        int x = (position->x + neighbors[neighbor][0] + simulation->width) % simulation->width;
-        int y = (position->y + neighbors[neighbor][1] + simulation->height) % simulation->height;
-        int child_energy = grazer->energy / 2;
+        int x = (position.x + neighbors[neighbor][0] + simulation->width) %
+            simulation->width;
+        int y = (position.y + neighbors[neighbor][1] + simulation->height) %
+            simulation->height;
+        int child_energy = energy / 2;
+        ecs_entity_t child = spawn_grazer_at(simulation, x, y, child_energy);
 
-        if (ecs_entity_is_alive(
+        if (entity_is_alive(simulation, child)) {
+            Grazer *parent = ecs_get_mut_id(
                 simulation->world,
-                spawn_grazer_at(simulation, x, y, child_energy)
-            )) {
-            grazer->energy -= child_energy;
+                entity,
+                simulation->grazer
+            );
+            parent->energy -= child_energy;
+            ecs_modified_id(simulation->world, entity, simulation->grazer);
             return;
         }
     }
@@ -322,41 +351,48 @@ static void reproduce_grazer(
 
 static void grazer_system(Simulation *simulation)
 {
-    EcsIterator iterator = ecs_query(
-        simulation->world,
-        component_pair(simulation->position, simulation->grazer)
-    );
-    EcsEntity entity;
+    ecs_iter_t iterator = ecs_query_iter(simulation->world, simulation->grazers);
     size_t count = 0u;
-    size_t index;
+    size_t snapshot_index;
 
-    while (count < ecs_world_capacity(simulation->world) &&
-           ecs_query_next(&iterator, &entity)) {
-        simulation->actor_snapshot[count] = entity;
-        count++;
+    while (ecs_query_next(&iterator)) {
+        int32_t index;
+
+        for (index = 0; index < iterator.count; ++index) {
+            if (count < SIMULATION_CAPACITY) {
+                simulation->actor_snapshot[count] = iterator.entities[index];
+                count++;
+            }
+        }
     }
 
-    for (index = 0u; index < count; ++index) {
+    for (snapshot_index = 0u; snapshot_index < count; ++snapshot_index) {
+        ecs_entity_t entity = simulation->actor_snapshot[snapshot_index];
         Position *position;
         Grazer *grazer;
+        int nutrition;
 
-        entity = simulation->actor_snapshot[index];
-        if (!ecs_entity_is_alive(simulation->world, entity)) {
+        if (!entity_is_alive(simulation, entity)) {
             continue;
         }
-        position = ecs_component_get(simulation->world, entity, simulation->position);
-        grazer = ecs_component_get(simulation->world, entity, simulation->grazer);
 
+        grazer = ecs_get_mut_id(simulation->world, entity, simulation->grazer);
         grazer->energy--;
         grazer->age++;
         if (grazer->energy <= 0 || grazer->age >= GRAZER_MAX_AGE) {
-            ecs_entity_destroy(simulation->world, entity);
+            ecs_delete(simulation->world, entity);
             continue;
         }
 
+        position = ecs_get_mut_id(simulation->world, entity, simulation->position);
         move_grazer(simulation, position);
-        eat_plant(simulation, position, grazer);
-        reproduce_grazer(simulation, position, grazer);
+        ecs_modified_id(simulation->world, entity, simulation->position);
+
+        nutrition = eat_plant(simulation, position);
+        grazer = ecs_get_mut_id(simulation->world, entity, simulation->grazer);
+        grazer->energy += nutrition;
+        ecs_modified_id(simulation->world, entity, simulation->grazer);
+        reproduce_grazer(simulation, entity);
     }
 }
 
@@ -364,6 +400,20 @@ static void plant_growth_system(Simulation *simulation)
 {
     size_t desired_growth = 1u + (size_t)(random_next(simulation) % 3u);
     (void)simulation_spawn(simulation, SIMULATION_PLANT, desired_growth);
+}
+
+static ecs_entity_t register_component(
+    ecs_world_t *world,
+    const char *name,
+    ecs_size_t size,
+    ecs_size_t alignment
+)
+{
+    ecs_entity_t entity = ecs_entity(world, {.name = name});
+    return ecs_component(world, {
+        .entity = entity,
+        .type = {.size = size, .alignment = alignment}
+    });
 }
 
 Simulation *simulation_create(int width, int height, uint32_t seed)
@@ -382,7 +432,7 @@ Simulation *simulation_create(int width, int height, uint32_t seed)
     }
 
     cell_count = (size_t)width * (size_t)height;
-    simulation->world = ecs_world_create(SIMULATION_CAPACITY);
+    simulation->world = ecs_init();
     simulation->actor_snapshot = malloc(
         SIMULATION_CAPACITY * sizeof(*simulation->actor_snapshot)
     );
@@ -397,14 +447,57 @@ Simulation *simulation_create(int width, int height, uint32_t seed)
         return NULL;
     }
 
-    simulation->position = ecs_component_register(simulation->world, sizeof(Position));
-    simulation->appearance = ecs_component_register(simulation->world, sizeof(Appearance));
-    simulation->plant = ecs_component_register(simulation->world, sizeof(Plant));
-    simulation->grazer = ecs_component_register(simulation->world, sizeof(Grazer));
-    if (simulation->position == ECS_COMPONENT_INVALID ||
-        simulation->appearance == ECS_COMPONENT_INVALID ||
-        simulation->plant == ECS_COMPONENT_INVALID ||
-        simulation->grazer == ECS_COMPONENT_INVALID) {
+    simulation->position = register_component(
+        simulation->world,
+        "Position",
+        (ecs_size_t)sizeof(Position),
+        (ecs_size_t)_Alignof(Position)
+    );
+    simulation->appearance = register_component(
+        simulation->world,
+        "Appearance",
+        (ecs_size_t)sizeof(Appearance),
+        (ecs_size_t)_Alignof(Appearance)
+    );
+    simulation->plant = register_component(
+        simulation->world,
+        "Plant",
+        (ecs_size_t)sizeof(Plant),
+        (ecs_size_t)_Alignof(Plant)
+    );
+    simulation->grazer = register_component(
+        simulation->world,
+        "Grazer",
+        (ecs_size_t)sizeof(Grazer),
+        (ecs_size_t)_Alignof(Grazer)
+    );
+
+    simulation->positions = ecs_query(simulation->world, {
+        .terms = {{.id = simulation->position}}
+    });
+    simulation->plants = ecs_query(simulation->world, {
+        .terms = {
+            {.id = simulation->position},
+            {.id = simulation->plant}
+        }
+    });
+    simulation->grazers = ecs_query(simulation->world, {
+        .terms = {
+            {.id = simulation->position},
+            {.id = simulation->grazer}
+        }
+    });
+    simulation->renderables = ecs_query(simulation->world, {
+        .terms = {
+            {.id = simulation->position},
+            {.id = simulation->appearance}
+        }
+    });
+
+    if (simulation->position == 0u || simulation->appearance == 0u ||
+        simulation->plant == 0u || simulation->grazer == 0u ||
+        simulation->positions == NULL || simulation->plants == NULL ||
+        simulation->grazers == NULL || simulation->renderables == NULL) {
         simulation_destroy(simulation);
         return NULL;
     }
@@ -417,9 +510,24 @@ void simulation_destroy(Simulation *simulation)
     if (simulation == NULL) {
         return;
     }
+
+    if (simulation->positions != NULL) {
+        ecs_query_fini(simulation->positions);
+    }
+    if (simulation->plants != NULL) {
+        ecs_query_fini(simulation->plants);
+    }
+    if (simulation->grazers != NULL) {
+        ecs_query_fini(simulation->grazers);
+    }
+    if (simulation->renderables != NULL) {
+        ecs_query_fini(simulation->renderables);
+    }
+    if (simulation->world != NULL) {
+        (void)ecs_fini(simulation->world);
+    }
     free(simulation->grid);
     free(simulation->actor_snapshot);
-    ecs_world_destroy(simulation->world);
     free(simulation);
 }
 
@@ -452,7 +560,7 @@ size_t simulation_spawn(
     while (spawned < count) {
         int x;
         int y;
-        EcsEntity entity;
+        ecs_entity_t entity;
 
         if (!find_open_cell(simulation, &x, &y)) {
             break;
@@ -462,7 +570,7 @@ size_t simulation_spawn(
         } else {
             entity = spawn_grazer_at(simulation, x, y, GRAZER_STARTING_ENERGY);
         }
-        if (!ecs_entity_is_alive(simulation->world, entity)) {
+        if (!entity_is_alive(simulation, entity)) {
             break;
         }
         spawned++;
@@ -487,31 +595,21 @@ void simulation_step(Simulation *simulation, size_t steps)
 SimulationStats simulation_stats(Simulation *simulation)
 {
     SimulationStats stats = {0u, 0u, 0u, 0u};
-    EcsIterator iterator;
-    EcsEntity entity;
 
     if (simulation == NULL) {
         return stats;
     }
 
     stats.tick = simulation->tick;
-    stats.entities = ecs_entity_count(simulation->world);
-
-    iterator = ecs_query(simulation->world, ecs_component_mask(simulation->plant));
-    while (ecs_query_next(&iterator, &entity)) {
-        stats.plants++;
-    }
-    iterator = ecs_query(simulation->world, ecs_component_mask(simulation->grazer));
-    while (ecs_query_next(&iterator, &entity)) {
-        stats.grazers++;
-    }
+    stats.plants = query_count(simulation, simulation->plants);
+    stats.grazers = query_count(simulation, simulation->grazers);
+    stats.entities = query_count(simulation, simulation->positions);
     return stats;
 }
 
 void simulation_render(Simulation *simulation, FILE *output)
 {
-    EcsIterator iterator;
-    EcsEntity entity;
+    ecs_iter_t iterator;
     SimulationStats stats;
     int x;
     int y;
@@ -525,24 +623,18 @@ void simulation_render(Simulation *simulation, FILE *output)
         ' ',
         (size_t)simulation->width * (size_t)simulation->height
     );
-    iterator = ecs_query(
-        simulation->world,
-        component_pair(simulation->position, simulation->appearance)
-    );
-    while (ecs_query_next(&iterator, &entity)) {
-        const Position *position = ecs_component_get_const(
-            simulation->world,
-            entity,
-            simulation->position
-        );
-        const Appearance *appearance = ecs_component_get_const(
-            simulation->world,
-            entity,
-            simulation->appearance
-        );
-        simulation->grid[
-            (size_t)position->y * (size_t)simulation->width + (size_t)position->x
-        ] = appearance->glyph;
+    iterator = ecs_query_iter(simulation->world, simulation->renderables);
+    while (ecs_query_next(&iterator)) {
+        const Position *positions = ecs_field(&iterator, Position, 0);
+        const Appearance *appearances = ecs_field(&iterator, Appearance, 1);
+        int32_t index;
+
+        for (index = 0; index < iterator.count; ++index) {
+            simulation->grid[
+                (size_t)positions[index].y * (size_t)simulation->width +
+                (size_t)positions[index].x
+            ] = appearances[index].glyph;
+        }
     }
 
     stats = simulation_stats(simulation);
