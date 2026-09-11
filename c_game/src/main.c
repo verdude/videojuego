@@ -2,10 +2,7 @@
 #include <stdio.h>
 
 typedef struct {
-  int range;
-  long bps;
-  int version;
-} BLE, WFD, UWB;
+} ;
 
 int main() {
   ecs_world_t *world = ecs_init();
