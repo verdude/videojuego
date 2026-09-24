@@ -3,3 +3,4 @@ zig-out/
 tags
 zig-pkg/
 *.xml
+build/
