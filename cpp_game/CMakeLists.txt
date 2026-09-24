@@ -17,5 +17,42 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 file(GLOB_RECURSE GAME_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 add_executable(game ${GAME_SOURCES})
+
+# Enable extensive warnings for our code without turning them into errors.
+if(MSVC)
+    target_compile_options(game PRIVATE /W4)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+    target_compile_options(game PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Wshadow
+        -Wnon-virtual-dtor
+        -Wold-style-cast
+        -Wcast-align
+        -Wcast-qual
+        -Woverloaded-virtual
+        -Wnull-dereference
+        -Wdouble-promotion
+        -Wformat=2
+        -Wimplicit-fallthrough
+        -Wundef
+        -Wmissing-declarations
+        -Wswitch-enum
+        -Wzero-as-null-pointer-constant
+    )
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(game PRIVATE
+            -Wduplicated-cond
+            -Wduplicated-branches
+            -Wlogical-op
+            -Wuseless-cast
+        )
+    endif()
+endif()
+
 target_link_libraries(game PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
 #target_link_libraries(game PRIVATE flecs::flecs_static)
