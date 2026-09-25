@@ -32,9 +32,11 @@ bool SDL::init() {
   return true;
 }
 
-void SDL::debug(char* message) {
+void SDL::debug(char* message, bool clear) {
+  if (clear) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
+  }
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     SDL_RenderDebugText(renderer, 100, 100, message);
 }
