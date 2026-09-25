@@ -5,32 +5,12 @@
 #include <SDL3/SDL_main.h>
 
 #include "input/Input.hpp"
+#include "graphics/sdl.hpp"
 
-static SDL_Window* window = nullptr;
-static SDL_Renderer* renderer = nullptr;
-
-static bool initialize_sdl() {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
-    std::cerr << "Failed to initialize SDL: " << SDL_GetError() << "\n";
-    SDL_Quit();
-    return false;
-  }
-
-  if (!SDL_CreateWindowAndRenderer("Game", 800, 800, 0, &window, &renderer)) {
-    std::cerr << "Failed to create window and renderer: " << SDL_GetError() << "\n";
-    SDL_Quit();
-    return false;
-  }
-
-  if (!SDL_SetRenderVSync(renderer, 1)) {
-    std::cerr << "vsync unsupported" << SDL_GetError() << "\n";
-  }
-
-  return true;
-}
 
 int main(int argc, char** argv) {
-  if (!initialize_sdl()) {
+  SDL sdl;
+  if (!sdl.init()) {
     return 1;
   }
 
@@ -64,16 +44,9 @@ int main(int argc, char** argv) {
     }
 
     // render
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-    SDL_RenderDebugText(renderer, 100, 100, "Welcome");
-    SDL_RenderPresent(renderer);
+    sdl.debug("welcome");
+    sdl.present();
   }
-
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
 
   return 0;
 }
