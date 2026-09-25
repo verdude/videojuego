@@ -3,18 +3,21 @@
 
 #include <chrono>
 #include <iostream>
+#include <vector>
 
+#include "combat/scene.hpp"
 #include "graphics/sdl.hpp"
-#include "input/Input.hpp"
+#include "input/inputcontroller.hpp"
 
 int
 main(int argc, char** argv)
 {
-  SDL sdl;
-  if (!sdl.init()) {
+  SDL graphics;
+  if (!graphics.init()) {
     return 1;
   }
 
+  std::vector<SDL_Event> events;
   using Clock = std::chrono::steady_clock;
   auto current_time = Clock::now();
 
@@ -22,13 +25,17 @@ main(int argc, char** argv)
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
-  bool play = true;
+  BattleScene scene = BattleScene();
+  scene.load();
 
-  while (play) {
+  while (true) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) {
-        play = false;
+        return 0;
+      } else {
+        // collect events
+        events.push_back(event);
       }
     }
 
@@ -45,9 +52,7 @@ main(int argc, char** argv)
     }
 
     // render
-    sdl.debug("welcome");
-    sdl.present();
+    graphics.debug("welcome");
+    graphics.present();
   }
-
-  return 0;
 }
