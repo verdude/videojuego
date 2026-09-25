@@ -10,7 +10,7 @@
 #include "input/inputcontroller.hpp"
 
 int
-main(int argc, char** argv)
+main()
 {
   SDL graphics;
   if (!graphics.init()) {
@@ -25,7 +25,7 @@ main(int argc, char** argv)
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
-  BattleScene scene = BattleScene();
+  BattleScene<KeyboardController> scene = BattleScene();
   scene.load();
 
   while (true) {

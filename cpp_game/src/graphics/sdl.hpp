@@ -11,6 +11,6 @@ public:
   SDL();
   ~SDL();
   bool init();
-  void debug(char*, bool = true);
+  void debug(const char*, bool = true);
   void present();
 };

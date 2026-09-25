@@ -41,7 +41,7 @@ SDL::init()
 }
 
 void
-SDL::debug(char* message, bool clear)
+SDL::debug(const char* message, bool clear)
 {
   if (clear) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
