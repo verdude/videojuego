@@ -2,7 +2,8 @@
 
 #include <SDL3/SDL.h>
 
-class SDL {
+class SDL
+{
   SDL_Window* window;
   SDL_Renderer* renderer;
 

@@ -1,14 +1,15 @@
-#include <iostream>
-#include <chrono>
-
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "input/Input.hpp"
+#include <chrono>
+#include <iostream>
+
 #include "graphics/sdl.hpp"
+#include "input/Input.hpp"
 
-
-int main(int argc, char** argv) {
+int
+main(int argc, char** argv)
+{
   SDL sdl;
   if (!sdl.init()) {
     return 1;
@@ -18,13 +19,12 @@ int main(int argc, char** argv) {
   auto current_time = Clock::now();
 
   // 60 ticks per second
-  double tick_duration = 1.0/60;
+  double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
   bool play = true;
 
   while (play) {
-
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) {
@@ -33,7 +33,8 @@ int main(int argc, char** argv) {
     }
 
     auto new_time = Clock::now();
-    double elapsed_time = std::chrono::duration<double>(new_time-current_time).count();
+    double elapsed_time =
+      std::chrono::duration<double>(new_time - current_time).count();
     current_time = new_time;
     simulatable_time += elapsed_time;
 
