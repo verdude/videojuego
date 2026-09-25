@@ -17,6 +17,7 @@ public:
   void start();
 };
 
+inline
 std::array<Action, SDL_SCANCODE_COUNT> buildPlayerKeymap() {
   std::array<Action, SDL_SCANCODE_COUNT> playerKeymap{};
   playerKeymap.fill(None);
@@ -26,6 +27,7 @@ std::array<Action, SDL_SCANCODE_COUNT> buildPlayerKeymap() {
   return playerKeymap;
 }
 
+inline
 std::array<Action, SDL_SCANCODE_COUNT> buildSecondaryKeymap() {
   std::array<Action, SDL_SCANCODE_COUNT> otherKeymap{};
   otherKeymap.fill(None);
