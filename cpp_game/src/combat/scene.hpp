@@ -16,3 +16,32 @@ public:
   void load();
   void start();
 };
+
+std::array<Action, SDL_SCANCODE_COUNT> buildPlayerKeymap() {
+  std::array<Action, SDL_SCANCODE_COUNT> playerKeymap{};
+  playerKeymap.fill(None);
+  playerKeymap[SDL_SCANCODE_A] = MoveLeft;
+  playerKeymap[SDL_SCANCODE_D] = MoveRight;
+  playerKeymap[SDL_SCANCODE_J] = Punch;
+  return playerKeymap;
+}
+
+std::array<Action, SDL_SCANCODE_COUNT> buildSecondaryKeymap() {
+  std::array<Action, SDL_SCANCODE_COUNT> otherKeymap{};
+  otherKeymap.fill(None);
+  otherKeymap[SDL_SCANCODE_LEFT] = MoveLeft;
+  otherKeymap[SDL_SCANCODE_RIGHT] = MoveRight;
+  otherKeymap[SDL_SCANCODE_KP_0] = Punch;
+  return otherKeymap;
+}
+
+template <typename T>
+BattleScene<T>::BattleScene() : player(KeyboardController(buildPlayerKeymap())), other(KeyboardController(buildSecondaryKeymap()))
+{ }
+
+template <typename T>
+void
+BattleScene<T>::start()
+{
+  std::cout << "start todo\n";
+}

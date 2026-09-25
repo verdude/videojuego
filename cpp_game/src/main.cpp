@@ -26,7 +26,6 @@ main()
   auto simulatable_time = 0.0;
 
   BattleScene<KeyboardController> scene = BattleScene();
-  scene.load();
 
   while (true) {
     SDL_Event event;

@@ -11,3 +11,9 @@ private:
 public:
   Fighter(T);
 };
+
+template <typename T>
+Fighter<T>::Fighter(T controller_)
+  : controller(controller_)
+{
+}
