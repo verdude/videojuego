@@ -39,7 +39,7 @@ buildPlayerKeymap();
 std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildSecondaryKeymap();
 
-}
+} // namespace fight_scene_detail
 
 FightScene
 localFight();

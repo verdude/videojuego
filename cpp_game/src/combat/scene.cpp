@@ -31,7 +31,7 @@ buildSecondaryKeymap()
   return otherKeymap;
 }
 
-}
+} // namespace fight_scene_detail
 
 FightScene
 localFight()
@@ -58,4 +58,6 @@ FightScene::ingest(const std::vector<SDL_Event>& events)
 void
 FightScene::update()
 {
+  player.update(playerController->get_commands());
+  other.update(otherController->get_commands());
 }
