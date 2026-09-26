@@ -19,8 +19,8 @@ private:
 public:
   FightScene(std::unique_ptr<InputController> c1,
              std::unique_ptr<InputController> c2)
-    : player()
-    , other()
+    : player(0)
+    , other(1)
     , playerController(std::move(c1))
     , otherController(std::move(c2))
   {

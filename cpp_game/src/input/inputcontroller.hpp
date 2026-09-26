@@ -8,7 +8,7 @@
 
 class InputController
 {
-private:
+protected:
   std::vector<FighterCommand> commands;
 
 public:

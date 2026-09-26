@@ -1,8 +1,7 @@
 #include <SDL3/SDL_events.h>
-#include <SDL3/SDL_log.h>
 
-#include "keyboardcontroller.hpp"
 #include "../combat/fightercommand.hpp"
+#include "keyboardcontroller.hpp"
 
 void
 KeyboardController::ingest(const std::vector<SDL_Event>& events)
@@ -11,8 +10,6 @@ KeyboardController::ingest(const std::vector<SDL_Event>& events)
   for (auto event : events) {
     if (event.type == SDL_EVENT_KEY_DOWN &&
         keymap[event.key.scancode] != FighterCommand::None) {
-        SDL_Log("scancode: %s",
-        SDL_GetScancodeName(event.key.scancode));
       commands.push_back(keymap[event.key.scancode]);
     }
   }

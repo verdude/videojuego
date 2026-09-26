@@ -5,7 +5,9 @@
 
 class Fighter
 {
+private:
+  const int id;
 public:
-  Fighter() {}
+  Fighter(const int n) : id(n) {}
   void update(const std::vector<FighterCommand>&);
 };

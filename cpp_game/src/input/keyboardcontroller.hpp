@@ -10,12 +10,11 @@ class KeyboardController : public InputController
 {
 private:
   std::array<FighterCommand, SDL_SCANCODE_COUNT> keymap;
-  std::vector<FighterCommand> commands;
 
 public:
   KeyboardController(std::array<FighterCommand, SDL_SCANCODE_COUNT> k)
-    : keymap(k)
-    , commands()
+    : InputController()
+    , keymap(k)
   {
   }
 
