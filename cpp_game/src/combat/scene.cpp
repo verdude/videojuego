@@ -51,6 +51,8 @@ BattleScene::start()
 void
 BattleScene::ingest(const std::vector<SDL_Event>& events)
 {
+  playerController->ingest(events);
+  otherController->ingest(events);
 }
 
 void

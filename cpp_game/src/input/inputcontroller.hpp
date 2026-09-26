@@ -10,7 +10,7 @@ class InputController
 {
 public:
   virtual ~InputController() = default;
-  virtual void ingest(std::vector<SDL_Event>&) = 0;
+  virtual void ingest(const std::vector<SDL_Event>&) = 0;
   virtual void ingest(SDL_Event) = 0;
   virtual void reset() = 0;
 };

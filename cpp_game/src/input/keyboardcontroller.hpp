@@ -19,7 +19,7 @@ public:
   {
   }
 
-  void ingest(std::vector<SDL_Event>&);
+  void ingest(const std::vector<SDL_Event>&);
   void ingest(SDL_Event);
   void reset();
 };
