@@ -47,6 +47,7 @@ main()
 
     while (simulatable_time >= tick_duration) {
       scene.ingest(events);
+      events.clear();
       scene.update();
       simulatable_time -= tick_duration;
     }

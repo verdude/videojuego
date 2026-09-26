@@ -1,7 +1,7 @@
 #include "fighter.hpp"
 #include "fightercommand.hpp"
-#include <vector>
 #include <iostream>
+#include <vector>
 
 void
 Fighter::update(const std::vector<FighterCommand>& commands)

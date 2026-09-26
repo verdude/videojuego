@@ -13,10 +13,10 @@ std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildPlayerKeymap()
 {
   std::array<FighterCommand, SDL_SCANCODE_COUNT> playerKeymap{};
-  playerKeymap.fill(None);
-  playerKeymap[SDL_SCANCODE_A] = MoveLeft;
-  playerKeymap[SDL_SCANCODE_D] = MoveRight;
-  playerKeymap[SDL_SCANCODE_J] = Punch;
+  playerKeymap.fill(FighterCommand::None);
+  playerKeymap[SDL_SCANCODE_A] = FighterCommand::MoveLeft;
+  playerKeymap[SDL_SCANCODE_D] = FighterCommand::MoveRight;
+  playerKeymap[SDL_SCANCODE_J] = FighterCommand::Punch;
   return playerKeymap;
 }
 
@@ -24,10 +24,10 @@ std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildSecondaryKeymap()
 {
   std::array<FighterCommand, SDL_SCANCODE_COUNT> otherKeymap{};
-  otherKeymap.fill(None);
-  otherKeymap[SDL_SCANCODE_LEFT] = MoveLeft;
-  otherKeymap[SDL_SCANCODE_RIGHT] = MoveRight;
-  otherKeymap[SDL_SCANCODE_KP_0] = Punch;
+  otherKeymap.fill(FighterCommand::None);
+  otherKeymap[SDL_SCANCODE_LEFT] = FighterCommand::MoveLeft;
+  otherKeymap[SDL_SCANCODE_RIGHT] = FighterCommand::MoveRight;
+  otherKeymap[SDL_SCANCODE_KP_0] = FighterCommand::Punch;
   return otherKeymap;
 }
 
