@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-class BattleScene
+class FightScene
 {
 private:
   Fighter player;
@@ -17,8 +17,8 @@ private:
   std::unique_ptr<InputController> otherController;
 
 public:
-  BattleScene(std::unique_ptr<InputController> c1,
-              std::unique_ptr<InputController> c2)
+  FightScene(std::unique_ptr<InputController> c1,
+             std::unique_ptr<InputController> c2)
     : player()
     , other()
     , playerController(std::move(c1))
@@ -31,7 +31,7 @@ public:
   void update();
 };
 
-namespace battle_scene_detail {
+namespace fight_scene_detail {
 
 std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildPlayerKeymap();
@@ -41,5 +41,5 @@ buildSecondaryKeymap();
 
 }
 
-BattleScene
-localBattle();
+FightScene
+localFight();

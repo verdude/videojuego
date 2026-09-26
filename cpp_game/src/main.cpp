@@ -25,7 +25,7 @@ main()
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
-  BattleScene scene = localBattle();
+  FightScene scene = localFight();
 
   while (true) {
     auto new_time = Clock::now();

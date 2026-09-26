@@ -7,7 +7,7 @@
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
 
-namespace battle_scene_detail {
+namespace fight_scene_detail {
 
 std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildPlayerKeymap()
@@ -33,32 +33,29 @@ buildSecondaryKeymap()
 
 }
 
-BattleScene
-localBattle()
+FightScene
+localFight()
 {
-  return BattleScene(std::make_unique<KeyboardController>(
-                       battle_scene_detail::buildPlayerKeymap()),
-                     std::make_unique<KeyboardController>(
-                       battle_scene_detail::buildSecondaryKeymap()));
+  return FightScene(std::make_unique<KeyboardController>(
+                      fight_scene_detail::buildPlayerKeymap()),
+                    std::make_unique<KeyboardController>(
+                      fight_scene_detail::buildSecondaryKeymap()));
 }
 
 void
-BattleScene::start()
+FightScene::start()
 {
   std::cout << "start todo\n";
 }
 
 void
-BattleScene::ingest(const std::vector<SDL_Event>& events)
+FightScene::ingest(const std::vector<SDL_Event>& events)
 {
   playerController->ingest(events);
   otherController->ingest(events);
 }
 
 void
-BattleScene::update()
+FightScene::update()
 {
 }
-
-BattleScene
-localBattle();
