@@ -25,10 +25,17 @@ main()
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
-  BattleScene<KeyboardController> scene = BattleScene();
+  BattleScene scene = localBattle();
 
   while (true) {
+    auto new_time = Clock::now();
+    double elapsed_time =
+      std::chrono::duration<double>(new_time - current_time).count();
+    current_time = new_time;
+    simulatable_time += elapsed_time;
+
     SDL_Event event;
+    // TODO: when to clear events
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) {
         return 0;
@@ -38,15 +45,9 @@ main()
       }
     }
 
-    auto new_time = Clock::now();
-    double elapsed_time =
-      std::chrono::duration<double>(new_time - current_time).count();
-    current_time = new_time;
-    simulatable_time += elapsed_time;
-
     while (simulatable_time >= tick_duration) {
-      // simulate gameplay
-      std::cout << elapsed_time << "\n";
+      scene.ingest(events);
+      scene.update();
       simulatable_time -= tick_duration;
     }
 

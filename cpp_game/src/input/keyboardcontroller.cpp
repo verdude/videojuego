@@ -1,7 +1,7 @@
 #include "keyboardcontroller.hpp"
 
 void
-KeyboardController::ingest(std::vector<SDL_Event> events)
+KeyboardController::ingest(std::vector<SDL_Event>& events)
 {
 }
 

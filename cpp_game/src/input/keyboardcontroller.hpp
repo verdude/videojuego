@@ -1,22 +1,25 @@
 #pragma once
 
-#include <array>
+#include "../combat/fightercommand.hpp"
 #include "inputcontroller.hpp"
 #include "keyboardcontroller.hpp"
+#include <array>
 #include <vector>
-#include "action.hpp"
 
 class KeyboardController : public InputController
 {
 private:
-  std::array<Action, SDL_SCANCODE_COUNT> keymap;
-  std::vector<Action> commands;
+  std::array<FighterCommand, SDL_SCANCODE_COUNT> keymap;
+  std::vector<FighterCommand> commands;
 
 public:
-  KeyboardController(std::array<Action, SDL_SCANCODE_COUNT> k)
-    : keymap(k), commands() {}
+  KeyboardController(std::array<FighterCommand, SDL_SCANCODE_COUNT> k)
+    : keymap(k)
+    , commands()
+  {
+  }
 
-  void ingest(std::vector<SDL_Event>);
+  void ingest(std::vector<SDL_Event>&);
   void ingest(SDL_Event);
   void reset();
 };

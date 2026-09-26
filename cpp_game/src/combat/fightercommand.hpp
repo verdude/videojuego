@@ -1,6 +1,6 @@
 #pragma once
 
-enum Action
+enum FighterCommand
 {
   None,
   MoveLeft,
