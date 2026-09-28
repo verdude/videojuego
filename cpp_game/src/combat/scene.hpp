@@ -3,7 +3,7 @@
 #include "../input/inputcontroller.hpp"
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
-#include <iostream>
+
 #include <memory>
 #include <vector>
 

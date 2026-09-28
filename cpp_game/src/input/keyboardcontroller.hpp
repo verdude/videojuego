@@ -3,6 +3,7 @@
 #include "../combat/fightercommand.hpp"
 #include "inputcontroller.hpp"
 #include "keyboardcontroller.hpp"
+
 #include <array>
 #include <vector>
 

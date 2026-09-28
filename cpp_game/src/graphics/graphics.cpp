@@ -1,14 +1,14 @@
-#include "sdl.hpp"
+#include "graphics.hpp"
 
 #include <iostream>
 
-SDL::SDL()
+Graphics::Graphics()
   : window(nullptr)
   , renderer(nullptr)
 {
 }
 
-SDL::~SDL()
+Graphics::~Graphics()
 {
   if (renderer) {
     SDL_DestroyRenderer(renderer);
@@ -20,10 +20,10 @@ SDL::~SDL()
 }
 
 bool
-SDL::init()
+Graphics::init()
 {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
-    std::cerr << "Failed to initialize SDL: " << SDL_GetError() << "\n";
+    std::cerr << "Failed to initialize Graphics: " << SDL_GetError() << "\n";
     return false;
   }
 
@@ -41,7 +41,7 @@ SDL::init()
 }
 
 void
-SDL::debug(const char* message, bool clear)
+Graphics::debug(const char* message, bool clear)
 {
   if (clear) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -52,7 +52,7 @@ SDL::debug(const char* message, bool clear)
 }
 
 void
-SDL::present()
+Graphics::present()
 {
   SDL_RenderPresent(renderer);
 }

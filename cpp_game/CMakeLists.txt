@@ -5,7 +5,20 @@ project(game LANGUAGES CXX)
 find_package(SDL3 3.2 REQUIRED CONFIG)
 find_package(SDL3_image 3.2 REQUIRED CONFIG)
 
-#include(FetchContent)
+find_package(nlohmann_json 3.12.0 QUIET CONFIG)
+if(NOT nlohmann_json_FOUND)
+    include(FetchContent)
+
+    if(POLICY CMP0135)
+        cmake_policy(SET CMP0135 NEW)
+    endif()
+
+    FetchContent_Declare(nlohmann_json
+        URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+        URL_HASH SHA256=42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
 
 #set(FLECS_SHARED OFF CACHE BOOL "" FORCE)
 #FetchContent_Declare( flecs GIT_REPOSITORY https://github.com/SanderMertens/flecs.git GIT_TAG v4.1.5 GIT_SHALLOW TRUE)
@@ -54,5 +67,9 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
     endif()
 endif()
 
-target_link_libraries(game PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+target_link_libraries(game PRIVATE
+    SDL3::SDL3
+    SDL3_image::SDL3_image
+    nlohmann_json::nlohmann_json
+)
 #target_link_libraries(game PRIVATE flecs::flecs_static)

@@ -1,0 +1,12 @@
+BasedOnStyle: Mozilla
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# The matching source header comes first, followed by quoted and system headers.
+IncludeCategories:
+  - Regex: '^"'
+    Priority: 1
+  - Regex: '^<'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3

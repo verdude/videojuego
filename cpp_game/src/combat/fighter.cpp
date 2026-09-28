@@ -1,5 +1,7 @@
 #include "fighter.hpp"
+
 #include "fightercommand.hpp"
+
 #include <iostream>
 #include <vector>
 

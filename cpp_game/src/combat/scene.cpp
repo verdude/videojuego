@@ -1,11 +1,12 @@
 #include "scene.hpp"
-#include "fightercommand.hpp"
-#include <SDL3/SDL_scancode.h>
-#include <array>
-#include <iostream>
 
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
+#include "fightercommand.hpp"
+
+#include <SDL3/SDL_scancode.h>
+#include <array>
+#include <iostream>
 
 namespace fight_scene_detail {
 

@@ -1,18 +1,17 @@
+#include "combat/scene.hpp"
+#include "graphics/graphics.hpp"
+#include "input/inputcontroller.hpp"
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-
 #include <chrono>
 #include <iostream>
 #include <vector>
 
-#include "combat/scene.hpp"
-#include "graphics/sdl.hpp"
-#include "input/inputcontroller.hpp"
-
 int
 main()
 {
-  SDL graphics;
+  Graphics graphics;
   if (!graphics.init()) {
     return 1;
   }

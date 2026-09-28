@@ -2,14 +2,15 @@
 
 #include <SDL3/SDL.h>
 
-class SDL
+class Graphics
 {
+private:
   SDL_Window* window;
   SDL_Renderer* renderer;
 
 public:
-  SDL();
-  ~SDL();
+  Graphics();
+  ~Graphics();
   bool init();
   void debug(const char*, bool = true);
   void present();

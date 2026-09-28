@@ -1,7 +1,8 @@
-#include <SDL3/SDL_events.h>
+#include "keyboardcontroller.hpp"
 
 #include "../combat/fightercommand.hpp"
-#include "keyboardcontroller.hpp"
+
+#include <SDL3/SDL_events.h>
 
 void
 KeyboardController::ingest(const std::vector<SDL_Event>& events)
