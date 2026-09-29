@@ -45,7 +45,7 @@ bool
 TextureStore::init(SDL_Renderer*& renderer)
 {
   // TODO: windows?
-  std::string path = "../../assets/";
+  std::string path = "assets/";
   for (const auto& entry : std::filesystem::directory_iterator(path)) {
     const auto& p = entry.path();
     if (entry.is_regular_file() && p.extension() == ".png") {
