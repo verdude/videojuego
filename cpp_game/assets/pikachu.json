@@ -1,0 +1,84 @@
+{ "frames": {
+   "pikachu 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 1.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 2.aseprite": {
+    "frame": { "x": 12, "y": 0, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 3.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 4.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 5.aseprite": {
+    "frame": { "x": 0, "y": 12, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 6.aseprite": {
+    "frame": { "x": 12, "y": 12, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   "pikachu 7.aseprite": {
+    "frame": { "x": 12, "y": 12, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.x-dev",
+  "image": "pikachu.png",
+  "format": "RGBA8888",
+  "size": { "w": 36, "h": 24 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "neutral", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
+   { "name": "walk", "from": 4, "to": 7, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "pikachu", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}

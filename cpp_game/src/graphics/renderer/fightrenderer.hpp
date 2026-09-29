@@ -10,5 +10,6 @@ private:
   TextureStore textures;
 
 public:
+  FightRenderer();
   void render(const FightScene&, Graphics&);
-}
+};
