@@ -45,6 +45,8 @@ private:
   Renderer renderer;
   TextureStore texture_store;
 
+  bool initTextures();
+
 public:
   Graphics();
   bool init();

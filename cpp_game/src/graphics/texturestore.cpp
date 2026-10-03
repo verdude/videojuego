@@ -40,22 +40,3 @@ TextureStore::~TextureStore()
 {
   cleanup();
 }
-
-bool
-TextureStore::init(SDL_Renderer*& renderer)
-{
-  // TODO: windows?
-  std::string path = "assets/";
-  for (const auto& entry : std::filesystem::directory_iterator(path)) {
-    const auto& p = entry.path();
-    if (entry.is_regular_file() && p.extension() == ".png") {
-      std::string name = p.string();
-      std::cout << "Loading png as texture: " << name << "\n";
-      if (!load_from_file(name.c_str(), renderer)) {
-        cleanup();
-        return false;
-      }
-    }
-  }
-  return true;
-}

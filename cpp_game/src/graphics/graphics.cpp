@@ -28,10 +28,9 @@ Graphics::init()
     std::cerr << "vsync unsupported" << SDL_GetError() << "\n";
   }
 
-  texture_store.init(renderer.r);
-
   return true;
 }
+
 
 void
 Graphics::debug(const char* message, bool clear)

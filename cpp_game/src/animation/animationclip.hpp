@@ -15,4 +15,6 @@ private:
 
 public:
   AnimationClip(const char*);
+bool
+TextureStore::load_from_file(const char* path, SDL_Renderer*& renderer);
 };
