@@ -28,3 +28,5 @@ clean:
 
 all: debug reldebug release
 
+fmt:
+	find src -name '*.cpp' -o -name '*.hpp' | xargs clang-format --style=file -i

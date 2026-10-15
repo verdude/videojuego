@@ -31,7 +31,6 @@ Graphics::init()
   return true;
 }
 
-
 void
 Graphics::debug(const char* message, bool clear)
 {
