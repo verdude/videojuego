@@ -29,6 +29,7 @@ public:
   void start();
   void ingest(const std::vector<SDL_Event>&);
   void update();
+  void render();
 };
 
 namespace fight_scene_detail {

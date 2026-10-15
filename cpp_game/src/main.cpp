@@ -52,6 +52,7 @@ main()
     }
 
     // render
+    scene.render();
     graphics.debug("welcome");
     graphics.present();
   }

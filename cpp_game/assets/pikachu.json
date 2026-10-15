@@ -1,75 +1,83 @@
-{ "frames": {
-   "pikachu 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
+{ "frames": [
+   {
+    "filename": "pikachu 0.aseprite",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 1.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 1.aseprite",
+    "frame": { "x": 10, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 2.aseprite": {
-    "frame": { "x": 12, "y": 0, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 2.aseprite",
+    "frame": { "x": 20, "y": 0, "w": 10, "h": 12 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 2, "y": 3, "w": 10, "h": 12 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 3.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 3.aseprite",
+    "frame": { "x": 30, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 4.aseprite": {
-    "frame": { "x": 24, "y": 0, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 4.aseprite",
+    "frame": { "x": 40, "y": 0, "w": 12, "h": 11 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 1, "y": 4, "w": 12, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 5.aseprite": {
-    "frame": { "x": 0, "y": 12, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 5.aseprite",
+    "frame": { "x": 52, "y": 0, "w": 12, "h": 10 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 1, "y": 5, "w": 12, "h": 10 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 6.aseprite": {
-    "frame": { "x": 12, "y": 12, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 6.aseprite",
+    "frame": { "x": 64, "y": 0, "w": 12, "h": 9 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 1, "y": 6, "w": 12, "h": 9 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    },
-   "pikachu 7.aseprite": {
-    "frame": { "x": 12, "y": 12, "w": 12, "h": 12 },
+   {
+    "filename": "pikachu 7.aseprite",
+    "frame": { "x": 76, "y": 0, "w": 12, "h": 9 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 1, "y": 3, "w": 12, "h": 12 },
+    "spriteSourceSize": { "x": 1, "y": 6, "w": 12, "h": 9 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 100
    }
- },
+ ],
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.x-dev",
   "image": "pikachu.png",
   "format": "RGBA8888",
-  "size": { "w": 36, "h": 24 },
+  "size": { "w": 88, "h": 12 },
   "scale": "1",
   "frameTags": [
    { "name": "neutral", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
@@ -79,6 +87,7 @@
    { "name": "pikachu", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
+   { "name": "Slice 1", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 0, "y": 0, "w": 16, "h": 16 }, "pivot": {"x": 7, "y": 16 } }] }
   ]
  }
 }
