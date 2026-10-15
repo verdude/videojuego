@@ -1,6 +1,7 @@
 #pragma once
 
-#include "texturestore.hpp"
+#include "../graphics/texturestore.hpp"
+#include "spritesheet.hpp"
 
 #include <SDL3/SDL.h>
 #include <unordered_map>
@@ -13,5 +14,5 @@ private:
 
 public:
   AssetStore();
-  bool init(SDL_Renderer*&);
-}
+  bool init();
+};

@@ -52,4 +52,6 @@ public:
   bool init();
   void debug(const char*, bool = true);
   void present();
+  void clear();
+  void render_texture(SDL_Texture*, SDL_FRect*, SDL_FRect*);
 };

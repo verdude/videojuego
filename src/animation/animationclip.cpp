@@ -5,3 +5,9 @@ AnimationClip::AnimationClip(const char* n)
   , animation_frames()
 {
 }
+
+void
+AnimationClip::insert(AnimationFrame frame)
+{
+  animation_frames.push_back(frame);
+}

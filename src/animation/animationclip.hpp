@@ -4,7 +4,8 @@
 
 struct AnimationFrame
 {
-  int x, y, w, h;
+  int x, y, w, h, sourceW, sourceH, spriteSourceX, spriteSourceY, spriteSourceW,
+    spriteSourceH;
 };
 
 class AnimationClip
@@ -15,4 +16,5 @@ private:
 
 public:
   AnimationClip(const char*);
+  void insert(AnimationFrame);
 };

@@ -11,12 +11,17 @@ struct Texture
   SDL_Texture* texture;
 };
 
+struct LoadTextureResult {
+  bool success;
+  size_t key;
+};
+
 class TextureStore
 {
 private:
   std::unordered_map<int, Texture> textures;
 
-  bool load_from_file(const char*, SDL_Renderer*&);
+  LoadTextureResult load_from_file(const char*, SDL_Renderer*&);
   void cleanup();
 
 public:

@@ -47,3 +47,15 @@ Graphics::present()
 {
   SDL_RenderPresent(renderer.r);
 }
+
+void
+Graphics::clear()
+{
+  SDL_RenderClear(renderer.r);
+}
+
+void
+Graphics::render_texture(SDL_Texture* t, SDL_FRect* src, SDL_FRect* dest)
+{
+  SDL_RenderTexture(renderer.r, t, src, dest);
+}

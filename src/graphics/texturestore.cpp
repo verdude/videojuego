@@ -9,15 +9,16 @@
 #include <string>
 #include <unordered_map>
 
-bool
+LoadTextureResult
 TextureStore::load_from_file(const char* path, SDL_Renderer*& renderer)
 {
   SDL_Texture* t = IMG_LoadTexture(renderer, path);
   if (!t) {
-    return false;
+    return {false,0};
   }
-  textures.insert({ textures.size(), Texture{ path, t } });
-  return true;
+  const auto key = textures.size();
+  textures.insert({ key, Texture{ path, t } });
+  return {true,key};
 }
 
 void

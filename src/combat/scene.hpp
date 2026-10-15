@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../animation/assetstore.hpp"
+#include "../graphics/graphics.hpp"
 #include "../input/inputcontroller.hpp"
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
@@ -29,7 +31,7 @@ public:
   void start();
   void ingest(const std::vector<SDL_Event>&);
   void update();
-  void render();
+  void render(Graphics&, AssetStore&);
 };
 
 namespace fight_scene_detail {

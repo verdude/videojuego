@@ -1,12 +1,19 @@
 #include "combat/scene.hpp"
 #include "graphics/graphics.hpp"
 #include "input/inputcontroller.hpp"
+#include "animation/assetstore.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <chrono>
 #include <iostream>
 #include <vector>
+
+static void
+load_assets(AssetStore& asset_store)
+{
+  asset_store.init();
+}
 
 int
 main()
@@ -15,6 +22,9 @@ main()
   if (!graphics.init()) {
     return 1;
   }
+
+  AssetStore asset_store = AssetStore();
+  load_assets(asset_store);
 
   std::vector<SDL_Event> events;
   using Clock = std::chrono::steady_clock;
@@ -52,7 +62,7 @@ main()
     }
 
     // render
-    scene.render();
+    scene.render(graphics, asset_store);
     graphics.debug("welcome");
     graphics.present();
   }

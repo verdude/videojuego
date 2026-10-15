@@ -62,3 +62,8 @@ FightScene::update()
   player.update(playerController->get_commands());
   other.update(otherController->get_commands());
 }
+
+void
+FightScene::render(Graphics& graphics, AssetStore& assetstore)
+{
+}
