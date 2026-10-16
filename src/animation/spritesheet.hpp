@@ -1,6 +1,7 @@
 #pragma once
 
 #include "animationclip.hpp"
+#include "../graphics/texturestore.hpp"
 
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -22,6 +23,6 @@ public:
   {
   }
 
-  void load();
+  void load(Texture*);
   AnimationClip* get_animation(std::string);
 };

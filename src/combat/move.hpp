@@ -12,13 +12,15 @@ class MoveDefinition
 
 public:
   MoveDefinition(int, int, int, int, AnimationClip*);
+  const AnimationClip* get_animation() const;
 };
 
 class MoveState
 {
   MoveDefinition& move;
-  int current_frame;
+  size_t current_frame;
 
 public:
   MoveState(MoveDefinition&);
+  const AnimationFrame& frame() const;
 };

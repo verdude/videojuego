@@ -18,10 +18,10 @@ public:
                     MoveDefinition walk,
                     MoveDefinition neutral,
                     MoveDefinition block)
-    : punch_(punch)
-    , walk_(walk)
-    , neutral_(neutral)
-    , block_(block)
+    : punch_(std::move(punch))
+    , walk_(std::move(walk))
+    , neutral_(std::move(neutral))
+    , block_(std::move(block))
   {
   }
 
@@ -35,7 +35,8 @@ class Fighter
 {
 private:
   const int id;
-  const std::shared_ptr<FighterDefinition> fighter_definition;
+  float position;
+  const std::shared_ptr<const FighterDefinition> fighter_definition;
 
   MoveState current_move;
 
@@ -47,4 +48,5 @@ public:
   {
   }
   void update(const std::vector<FighterCommand>&);
+  const AnimationFrame& frame() const;
 };

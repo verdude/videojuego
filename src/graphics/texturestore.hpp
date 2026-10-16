@@ -14,13 +14,14 @@ struct Texture
 struct LoadTextureResult
 {
   bool success;
+  // TODO: return pointer to reduce complexity
   size_t key;
 };
 
 class TextureStore
 {
 private:
-  std::unordered_map<size_t, Texture> textures;
+  std::unordered_map<size_t, const Texture> textures;
 
   void cleanup();
 
@@ -29,4 +30,5 @@ public:
   ~TextureStore();
   bool init(SDL_Renderer*&);
   LoadTextureResult load_from_file(const char*, SDL_Renderer*);
+  Texture* get(size_t) const;
 };

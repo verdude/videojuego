@@ -69,6 +69,8 @@ FightScene::update()
 void
 FightScene::render(Graphics& graphics, AssetStore& assetstore)
 {
+  auto frame = player.frame();
+  graphics.render_texture(frame, player.position);
 }
 
 FightScene::FightScene(std::unique_ptr<InputController> c1,

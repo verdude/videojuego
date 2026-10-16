@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../graphics/texturestore.hpp"
+
 #include <string>
 #include <vector>
 
@@ -7,6 +9,7 @@ struct AnimationFrame
 {
   int x, y, w, h, sourceW, sourceH, spriteSourceX, spriteSourceY, spriteSourceW,
     spriteSourceH;
+  Texture* texture;
 };
 
 class AnimationClip
@@ -18,4 +21,5 @@ private:
 public:
   AnimationClip(const char*);
   void insert(AnimationFrame);
+  const AnimationFrame& frame(size_t) const;
 };

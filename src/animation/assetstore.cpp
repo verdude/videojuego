@@ -29,9 +29,6 @@ AssetStore::init(SDL_Renderer* renderer)
         continue;
       }
 
-      SpriteSheet sheet(entry.path().string().c_str());
-      sheet.load();
-
       auto texture_path = entry.path();
       texture_path.replace_extension(".png");
       const auto result =
@@ -41,6 +38,15 @@ AssetStore::init(SDL_Renderer* renderer)
                   << SDL_GetError() << '\n';
         return false;
       }
+
+      SpriteSheet sheet(entry.path().string().c_str());
+      auto* t = texture_store.get(result.key);
+      if (t == nullptr) {
+        std::cerr << "Failed to get texture out of store" << "\n";
+        return false;
+      }
+      sheet.load(t);
+
 
       sprite_sheets.emplace(name, std::move(sheet));
     }

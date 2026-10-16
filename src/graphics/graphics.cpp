@@ -1,4 +1,5 @@
 #include "graphics.hpp"
+#include "texturestore.hpp"
 
 #include <iostream>
 
@@ -61,7 +62,9 @@ Graphics::clear()
 }
 
 void
-Graphics::render_texture(SDL_Texture* t, SDL_FRect* src, SDL_FRect* dest)
+Graphics::render_texture(const AnimationFrame* f, const Rect* dest)
 {
-  SDL_RenderTexture(renderer.r, t, src, dest);
+  SDL_FRect src{float(f.x),float(f.y),float(f.w),float(f.h)};
+  SDL_FRect sdl_dest{float(dest.x), float(dest.y), float(dest.w), float(dest.h)};
+  SDL_RenderTexture(renderer.r, f->texture.texture, &src, &sdl_dest);
 }

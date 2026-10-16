@@ -4,6 +4,10 @@
 
 #include <SDL3/SDL.h>
 
+struct Rect {
+  float x,y,w,h;
+};
+
 // Wrapper classes for automatic ordered destruction
 class Renderer
 {
@@ -54,5 +58,5 @@ public:
   void debug(const char*, bool = true);
   void present();
   void clear();
-  void render_texture(SDL_Texture*, SDL_FRect*, SDL_FRect*);
+  void render_texture(Texture*, AnimationFrame*, Rect*);
 };

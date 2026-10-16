@@ -1,12 +1,13 @@
 #include "spritesheet.hpp"
 
 #include "animationclip.hpp"
+#include "../graphics/texturestore.hpp"
 
 #include <stdexcept>
 #include <string>
 
 void
-SpriteSheet::load()
+SpriteSheet::load(Texture* texture)
 {
   std::ifstream f(path);
   if (!f) {
@@ -31,6 +32,7 @@ SpriteSheet::load()
         .spriteSourceY = frame.at("spriteSourceSize").at("y"),
         .spriteSourceW = frame.at("spriteSourceSize").at("w"),
         .spriteSourceH = frame.at("spriteSourceSize").at("h"),
+        .texture = texture,
       });
     }
     animations.insert({ name, clip });
