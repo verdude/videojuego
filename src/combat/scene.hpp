@@ -21,9 +21,8 @@ private:
 public:
   FightScene(std::unique_ptr<InputController>,
              std::unique_ptr<InputController>,
-           std::shared_ptr<FighterDefinition>,
-           std::shared_ptr<FighterDefinition>
-             );
+             std::shared_ptr<FighterDefinition>,
+             std::shared_ptr<FighterDefinition>);
 
   void start();
   void ingest(const std::vector<SDL_Event>&);
@@ -41,5 +40,5 @@ buildSecondaryKeymap();
 
 } // namespace fight_scene_detail
 
-FightScene
-localFight();
+FightScene localFight(std::shared_ptr<FighterDefinition>,
+                      std::shared_ptr<FighterDefinition>);

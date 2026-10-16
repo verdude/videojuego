@@ -37,8 +37,9 @@ SpriteSheet::load()
   }
 }
 
-
-AnimationClip* SpriteSheet::get_animation(std::string name) {
+AnimationClip*
+SpriteSheet::get_animation(std::string name)
+{
   auto animation = animations.find(name);
   return animation != animations.end() ? &animation->second : nullptr;
 }

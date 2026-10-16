@@ -16,9 +16,9 @@ public:
 
 class MoveState
 {
-  MoveDefinition* move;
+  MoveDefinition& move;
   int current_frame;
 
 public:
-  MoveState(MoveDefinition*);
+  MoveState(MoveDefinition&);
 };

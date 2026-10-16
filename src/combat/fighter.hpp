@@ -8,20 +8,20 @@
 
 class FighterDefinition
 {
-  const std::unique_ptr<MoveDefinition> punch_;
-  const std::unique_ptr<MoveDefinition> walk_;
-  const std::unique_ptr<MoveDefinition> neutral_;
-  const std::unique_ptr<MoveDefinition> block_;
+  MoveDefinition punch_;
+  MoveDefinition walk_;
+  MoveDefinition neutral_;
+  MoveDefinition block_;
 
 public:
-  FighterDefinition(std::unique_ptr<MoveDefinition> punch,
-                    std::unique_ptr<MoveDefinition> walk,
-                    std::unique_ptr<MoveDefinition> neutral,
-                    std::unique_ptr<MoveDefinition> block)
-    : punch_(std::move(punch))
-    , walk_(std::move(walk))
-    , neutral_(std::move(neutral))
-    , block_(std::move(block))
+  FighterDefinition(MoveDefinition punch,
+                    MoveDefinition walk,
+                    MoveDefinition neutral,
+                    MoveDefinition block)
+    : punch_(punch)
+    , walk_(walk)
+    , neutral_(neutral)
+    , block_(block)
   {
   }
 

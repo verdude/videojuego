@@ -15,7 +15,7 @@ MoveDefinition::MoveDefinition(int startup_frames_,
 {
 }
 
-MoveState::MoveState(MoveDefinition* move_)
+MoveState::MoveState(MoveDefinition& move_)
   : move(move_)
   , current_frame(0)
 {

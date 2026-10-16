@@ -1,4 +1,5 @@
 #include "animation/assetstore.hpp"
+#include "combat/fighter.hpp"
 #include "combat/scene.hpp"
 #include "graphics/graphics.hpp"
 #include "input/inputcontroller.hpp"
@@ -7,17 +8,28 @@
 #include <SDL3/SDL_main.h>
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <vector>
 
-static void
-init_moves(Fighter fighter)
+static std::shared_ptr<FighterDefinition>
+init_moves(SpriteSheet* sheet)
 {
-
+  MoveDefinition punch =
+    MoveDefinition(2, 1, 1, 1, sheet->get_animation("punch"));
+  MoveDefinition walk =
+    MoveDefinition(2, 1, 1, 1, sheet->get_animation("walk"));
+  MoveDefinition neutral =
+    MoveDefinition(2, 1, 1, 1, sheet->get_animation("neutral"));
+  MoveDefinition block =
+    MoveDefinition(2, 1, 1, 1, sheet->get_animation("block"));
+  return std::make_shared<FighterDefinition>(punch, walk, neutral, block);
 }
 
 static std::shared_ptr<FighterDefinition>
-load_fighter_definition(AssetStore& asset_store) {
-
+load_fighter_definition(AssetStore& asset_store, const char* name = "pikachu")
+{
+  auto sheet = asset_store.get_sheet(name);
+  return init_moves(sheet);
 }
 
 static bool
@@ -47,8 +59,9 @@ main()
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
-  std::shared_ptr<FighterDefinition> pikachu = load_fighter_definition();
-  FightScene scene = localFight();
+  std::shared_ptr<FighterDefinition> pikachu =
+    load_fighter_definition(asset_store);
+  FightScene scene = localFight(pikachu, pikachu);
 
   while (true) {
     auto new_time = Clock::now();
