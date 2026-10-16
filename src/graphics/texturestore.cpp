@@ -10,15 +10,15 @@
 #include <unordered_map>
 
 LoadTextureResult
-TextureStore::load_from_file(const char* path, SDL_Renderer*& renderer)
+TextureStore::load_from_file(const char* path, SDL_Renderer* renderer)
 {
   SDL_Texture* t = IMG_LoadTexture(renderer, path);
   if (!t) {
-    return {false,0};
+    return { false, 0 };
   }
   const auto key = textures.size();
   textures.insert({ key, Texture{ path, t } });
-  return {true,key};
+  return { true, key };
 }
 
 void

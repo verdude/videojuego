@@ -9,13 +9,13 @@ endif
 
 .PHONY: build debug reldebug release clean
 
-reldebug:
-	cmake -S . -B build/reldebug -DCMAKE_BUILD_TYPE=RelWithDebInfo $(CMAKE_FLAGS)
-	cmake --build build/reldebug
-
 debug:
 	cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug $(CMAKE_FLAGS)
 	cmake --build build/debug
+
+reldebug:
+	cmake -S . -B build/reldebug -DCMAKE_BUILD_TYPE=RelWithDebInfo $(CMAKE_FLAGS)
+	cmake --build build/reldebug
 
 release:
 	cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release $(CMAKE_FLAGS)

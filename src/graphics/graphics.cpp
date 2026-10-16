@@ -31,6 +31,12 @@ Graphics::init()
   return true;
 }
 
+SDL_Renderer*
+Graphics::get_renderer() const
+{
+  return renderer.r;
+}
+
 void
 Graphics::debug(const char* message, bool clear)
 {

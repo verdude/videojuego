@@ -19,14 +19,11 @@ private:
   std::unique_ptr<InputController> otherController;
 
 public:
-  FightScene(std::unique_ptr<InputController> c1,
-             std::unique_ptr<InputController> c2)
-    : player(0)
-    , other(1)
-    , playerController(std::move(c1))
-    , otherController(std::move(c2))
-  {
-  }
+  FightScene(std::unique_ptr<InputController>,
+             std::unique_ptr<InputController>,
+           std::shared_ptr<FighterDefinition>,
+           std::shared_ptr<FighterDefinition>
+             );
 
   void start();
   void ingest(const std::vector<SDL_Event>&);

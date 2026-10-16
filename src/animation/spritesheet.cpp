@@ -1,32 +1,44 @@
-#include <string>
-
 #include "spritesheet.hpp"
 
 #include "animationclip.hpp"
+
+#include <stdexcept>
+#include <string>
 
 void
 SpriteSheet::load()
 {
   std::ifstream f(path);
+  if (!f) {
+    throw std::runtime_error("Failed to open spritesheet " + path);
+  }
   json data = json::parse(f);
-  for (auto tag : data["frameTags"]) {
-    auto clip = AnimationClip(path);
-    std::string name = tag["name"].get<std::string>();
-    for (auto i = tag["from"].get<unsigned long>(); i < tag["to"].get<unsigned long>(); ++i) {
-      auto frame = data["frames"][i];
+  for (const auto& tag : data.at("meta").at("frameTags")) {
+    std::string name = tag.at("name").get<std::string>();
+    auto clip = AnimationClip(name.c_str());
+    for (auto i = tag.at("from").get<std::size_t>();
+         i <= tag.at("to").get<std::size_t>();
+         ++i) {
+      const auto& frame = data.at("frames").at(i);
       clip.insert(AnimationFrame{
-        .x = frame["frame"]["x"],
-        .y = frame["frame"]["y"],
-        .w = frame["frame"]["w"],
-        .h = frame["frame"]["h"],
-        .sourceW = frame["frame"]["sourceSize"]["w"],
-        .sourceH = frame["frame"]["sourceSize"]["h"],
-        .spriteSourceX = frame["frame"]["spriteSourceSize"]["x"],
-        .spriteSourceY = frame["frame"]["spriteSourceSize"]["y"],
-        .spriteSourceW = frame["frame"]["spriteSourceSize"]["w"],
-        .spriteSourceH = frame["frame"]["spriteSourceSize"]["h"],
+        .x = frame.at("frame").at("x"),
+        .y = frame.at("frame").at("y"),
+        .w = frame.at("frame").at("w"),
+        .h = frame.at("frame").at("h"),
+        .sourceW = frame.at("sourceSize").at("w"),
+        .sourceH = frame.at("sourceSize").at("h"),
+        .spriteSourceX = frame.at("spriteSourceSize").at("x"),
+        .spriteSourceY = frame.at("spriteSourceSize").at("y"),
+        .spriteSourceW = frame.at("spriteSourceSize").at("w"),
+        .spriteSourceH = frame.at("spriteSourceSize").at("h"),
       });
     }
-    animations.insert({name, clip});
+    animations.insert({ name, clip });
   }
+}
+
+
+AnimationClip* SpriteSheet::get_animation(std::string name) {
+  auto animation = animations.find(name);
+  return animation != animations.end() ? &animation->second : nullptr;
 }

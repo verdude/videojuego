@@ -1,7 +1,7 @@
+#include "animation/assetstore.hpp"
 #include "combat/scene.hpp"
 #include "graphics/graphics.hpp"
 #include "input/inputcontroller.hpp"
-#include "animation/assetstore.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -10,9 +10,20 @@
 #include <vector>
 
 static void
-load_assets(AssetStore& asset_store)
+init_moves(Fighter fighter)
 {
-  asset_store.init();
+
+}
+
+static std::shared_ptr<FighterDefinition>
+load_fighter_definition(AssetStore& asset_store) {
+
+}
+
+static bool
+load_assets(AssetStore& asset_store, SDL_Renderer* renderer)
+{
+  return asset_store.init(renderer);
 }
 
 int
@@ -24,7 +35,9 @@ main()
   }
 
   AssetStore asset_store = AssetStore();
-  load_assets(asset_store);
+  if (!load_assets(asset_store, graphics.get_renderer())) {
+    return 1;
+  }
 
   std::vector<SDL_Event> events;
   using Clock = std::chrono::steady_clock;
@@ -34,6 +47,7 @@ main()
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
+  std::shared_ptr<FighterDefinition> pikachu = load_fighter_definition();
   FightScene scene = localFight();
 
   while (true) {

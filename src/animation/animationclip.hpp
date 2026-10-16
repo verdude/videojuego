@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 struct AnimationFrame
@@ -11,7 +12,7 @@ struct AnimationFrame
 class AnimationClip
 {
 private:
-  const char* name;
+  std::string name;
   std::vector<AnimationFrame> animation_frames;
 
 public:

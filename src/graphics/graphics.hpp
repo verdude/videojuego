@@ -50,6 +50,7 @@ private:
 public:
   Graphics();
   bool init();
+  SDL_Renderer* get_renderer() const;
   void debug(const char*, bool = true);
   void present();
   void clear();

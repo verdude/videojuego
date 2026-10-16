@@ -2,16 +2,17 @@
 
 #include "animationclip.hpp"
 
-#include <string>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <unordered_map>
 
 using json = nlohmann::json;
 
 class SpriteSheet
 {
 private:
-  const char* path;
+  std::string path;
   std::unordered_map<std::string, AnimationClip> animations;
 
 public:
@@ -22,4 +23,5 @@ public:
   }
 
   void load();
+  AnimationClip* get_animation(std::string);
 };

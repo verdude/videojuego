@@ -35,12 +35,14 @@ buildSecondaryKeymap()
 } // namespace fight_scene_detail
 
 FightScene
-localFight()
+localFight(std::shared_ptr<FighterDefinition> player, std::shared_ptr<FighterDefinition> opponent)
 {
   return FightScene(std::make_unique<KeyboardController>(
                       fight_scene_detail::buildPlayerKeymap()),
                     std::make_unique<KeyboardController>(
-                      fight_scene_detail::buildSecondaryKeymap()));
+                      fight_scene_detail::buildSecondaryKeymap()),
+                    player,
+                    opponent);
 }
 
 void
@@ -65,5 +67,17 @@ FightScene::update()
 
 void
 FightScene::render(Graphics& graphics, AssetStore& assetstore)
+{
+}
+
+FightScene::FightScene(std::unique_ptr<InputController> c1,
+           std::unique_ptr<InputController> c2,
+           std::shared_ptr<FighterDefinition> player_character,
+           std::shared_ptr<FighterDefinition> other_character
+           )
+  : player(0, player_character)
+  , other(1, other_character)
+  , playerController(std::move(c1))
+  , otherController(std::move(c2))
 {
 }
