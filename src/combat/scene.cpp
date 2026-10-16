@@ -3,6 +3,7 @@
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
 #include "fightercommand.hpp"
+#include "../geometry/types.hpp"
 
 #include <SDL3/SDL_scancode.h>
 #include <array>
@@ -70,15 +71,17 @@ void
 FightScene::render(Graphics& graphics, AssetStore& assetstore)
 {
   auto frame = player.frame();
-  graphics.render_texture(frame, player.position);
+  auto anchor = player.get_anchor();
+  SDL_FRect dest{float(anchor.x), float(anchor.y), frame.};
+  graphics.render_texture(frame, &dest);
 }
 
 FightScene::FightScene(std::unique_ptr<InputController> c1,
                        std::unique_ptr<InputController> c2,
                        std::shared_ptr<FighterDefinition> player_character,
                        std::shared_ptr<FighterDefinition> other_character)
-  : player(0, player_character)
-  , other(1, other_character)
+  : player(0, Vec2{50,100}, player_character)
+  , other(1, Vec2{100,100}, other_character)
   , playerController(std::move(c1))
   , otherController(std::move(c2))
 {

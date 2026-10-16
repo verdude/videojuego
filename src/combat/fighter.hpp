@@ -2,6 +2,7 @@
 
 #include "fightercommand.hpp"
 #include "move.hpp"
+#include "../geometry/types.hpp"
 
 #include <memory>
 #include <vector>
@@ -35,18 +36,20 @@ class Fighter
 {
 private:
   const int id;
-  float position;
+  Vec2 anchor;
   const std::shared_ptr<const FighterDefinition> fighter_definition;
 
   MoveState current_move;
 
 public:
-  Fighter(const int n, std::shared_ptr<FighterDefinition> who)
+  Fighter(const int n, Vec2 position, std::shared_ptr<FighterDefinition> who)
     : id(n)
+    , anchor(pos)
     , fighter_definition(who)
     , current_move(who->neutral())
   {
   }
   void update(const std::vector<FighterCommand>&);
   const AnimationFrame& frame() const;
+  const Vec2& get_anchor() const;
 };

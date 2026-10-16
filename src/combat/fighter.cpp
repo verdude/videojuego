@@ -36,3 +36,8 @@ Fighter::update(const std::vector<FighterCommand>& commands)
     std::cout << "Fighter [" << id << "] responding to command: " << c << "\n";
   }
 }
+
+const Vec2&
+get_anchor() const {
+  return anchor;
+}
