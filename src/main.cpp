@@ -89,8 +89,9 @@ main()
     }
 
     // render
+    graphics.clear();
     scene.render(graphics, asset_store);
-    graphics.debug("welcome");
+    graphics.debug("welcome", false);
     graphics.present();
   }
 }

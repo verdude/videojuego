@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../geometry/types.hpp"
 #include "../graphics/texturestore.hpp"
 
 #include <string>
@@ -9,7 +10,8 @@ struct AnimationFrame
 {
   int x, y, w, h, sourceW, sourceH, spriteSourceX, spriteSourceY, spriteSourceW,
     spriteSourceH;
-  Texture* texture;
+  Vec2 drawOffset;
+  const Texture* texture;
 };
 
 class AnimationClip

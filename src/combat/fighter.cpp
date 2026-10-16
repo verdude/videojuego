@@ -37,7 +37,14 @@ Fighter::update(const std::vector<FighterCommand>& commands)
   }
 }
 
+const AnimationFrame&
+Fighter::frame() const
+{
+  return current_move.frame();
+}
+
 const Vec2&
-get_anchor() const {
+Fighter::get_anchor() const
+{
   return anchor;
 }

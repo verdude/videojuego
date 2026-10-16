@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../geometry/types.hpp"
 #include "fightercommand.hpp"
 #include "move.hpp"
-#include "../geometry/types.hpp"
 
 #include <memory>
 #include <vector>
@@ -44,7 +44,7 @@ private:
 public:
   Fighter(const int n, Vec2 position, std::shared_ptr<FighterDefinition> who)
     : id(n)
-    , anchor(pos)
+    , anchor(position)
     , fighter_definition(who)
     , current_move(who->neutral())
   {

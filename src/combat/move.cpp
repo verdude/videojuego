@@ -15,7 +15,9 @@ MoveDefinition::MoveDefinition(int startup_frames_,
 {
 }
 
-const AnimationClip* MoveDefinition::get_animation() const {
+const AnimationClip*
+MoveDefinition::get_animation() const
+{
   return animation;
 }
 
@@ -25,6 +27,8 @@ MoveState::MoveState(MoveDefinition& move_)
 {
 }
 
-const AnimationFrame& MoveState::frame() const {
+const AnimationFrame&
+MoveState::frame() const
+{
   return move.get_animation()->frame(current_frame);
 }

@@ -30,5 +30,5 @@ public:
   ~TextureStore();
   bool init(SDL_Renderer*&);
   LoadTextureResult load_from_file(const char*, SDL_Renderer*);
-  Texture* get(size_t) const;
+  const Texture* get(size_t) const;
 };

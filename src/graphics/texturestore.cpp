@@ -42,7 +42,9 @@ TextureStore::~TextureStore()
   cleanup();
 }
 
-Texture* TextureStore::get(size_t key) const {
+const Texture*
+TextureStore::get(size_t key) const
+{
   auto texture = textures.find(key);
   return texture != textures.end() ? &texture->second : nullptr;
 }

@@ -1,9 +1,11 @@
 #pragma once
 
-#include "texturestore.hpp"
 #include "../geometry/types.hpp"
+#include "texturestore.hpp"
 
 #include <SDL3/SDL.h>
+
+struct AnimationFrame;
 
 // Wrapper classes for automatic ordered destruction
 class Renderer
@@ -55,5 +57,5 @@ public:
   void debug(const char*, bool = true);
   void present();
   void clear();
-  void render_texture(AnimationFrame*, Rect*);
+  void render_texture(const AnimationFrame*, const Rect*);
 };

@@ -47,7 +47,6 @@ AssetStore::init(SDL_Renderer* renderer)
       }
       sheet.load(t);
 
-
       sprite_sheets.emplace(name, std::move(sheet));
     }
   } catch (const std::exception& e) {

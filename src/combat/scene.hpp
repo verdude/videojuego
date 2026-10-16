@@ -38,6 +38,14 @@ buildPlayerKeymap();
 std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildSecondaryKeymap();
 
+struct FighterRender {
+  const AnimationFrame& frame;
+  Rect destination;
+};
+
+const FighterRender
+texture_destination(Fighter& fighter);
+
 } // namespace fight_scene_detail
 
 FightScene localFight(std::shared_ptr<FighterDefinition>,
