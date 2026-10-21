@@ -15,13 +15,13 @@ static std::shared_ptr<FighterDefinition>
 init_moves(SpriteSheet* sheet)
 {
   MoveDefinition punch =
-    MoveDefinition(2, 1, 1, 1, sheet->get_animation("punch"));
+    MoveDefinition(2, 1, 1, 1, false, sheet->get_animation("punch"));
   MoveDefinition walk =
-    MoveDefinition(2, 1, 1, 1, sheet->get_animation("walk"));
+    MoveDefinition(2, 1, 1, 1, false, sheet->get_animation("walk"));
   MoveDefinition neutral =
-    MoveDefinition(2, 1, 1, 1, sheet->get_animation("neutral"));
+    MoveDefinition(2, 1, 1, 1, true, sheet->get_animation("neutral"));
   MoveDefinition block =
-    MoveDefinition(2, 1, 1, 1, sheet->get_animation("block"));
+    MoveDefinition(2, 1, 1, 1, false, sheet->get_animation("block"));
   return std::make_shared<FighterDefinition>(punch, walk, neutral, block);
 }
 

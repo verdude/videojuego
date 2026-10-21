@@ -32,8 +32,26 @@ FighterDefinition::block()
 void
 Fighter::update(const std::vector<FighterCommand>& commands)
 {
+  current_move.tick();
   for (auto c : commands) {
     std::cout << "Fighter [" << id << "] responding to command: " << c << "\n";
+    switch (c) {
+      case FighterCommand::MoveLeft:
+        current_move = fighter_definition.walk(true);
+        break;
+      case FighterCommand::MoveRight:
+        current_move = fighter_definition.walk(false);
+        break;
+      case FighterCommand::Punch:
+        current_move = fighter_definition.punch();
+        break;
+      case FighterCommand::Block:
+        current_move = fighter_definition.block();
+        break;
+      default:
+        std::cerr << "got NONE command\n";
+        break;
+    }
   }
 }
 

@@ -4,23 +4,29 @@
 
 class MoveDefinition
 {
-  int startup_frames;
-  int active_frames;
-  int recovery_frames;
-  int damage;
+  uint32_t startup_frames;
+  uint32_t active_frames;
+  uint32_t recovery_frames;
+  uint32_t damage;
+  bool loop;
   AnimationClip* animation;
 
 public:
-  MoveDefinition(int, int, int, int, AnimationClip*);
+  MoveDefinition(uint32_t, uint32_t, uint32_t, uint32_t, bool, AnimationClip*);
   const AnimationClip* get_animation() const;
+  int total_frames() const;
 };
 
 class MoveState
 {
   MoveDefinition& move;
   size_t current_frame;
+  bool started;
+  bool flip;
 
 public:
-  MoveState(MoveDefinition&);
+  MoveState(MoveDefinition&, bool);
   const AnimationFrame& frame() const;
+  bool complete() const;
+  void tick();
 };

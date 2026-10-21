@@ -42,10 +42,7 @@ texture_destination(Fighter& fighter)
                    float(anchor.y + frame.drawOffset.y),
                    float(frame.spriteSourceW),
                    float(frame.spriteSourceH) };
-  return FighterRender{
-    frame,
-    dest
-  };
+  return FighterRender{ frame, dest };
 }
 
 } // namespace fight_scene_detail

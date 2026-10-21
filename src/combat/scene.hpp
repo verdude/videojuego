@@ -38,7 +38,8 @@ buildPlayerKeymap();
 std::array<FighterCommand, SDL_SCANCODE_COUNT>
 buildSecondaryKeymap();
 
-struct FighterRender {
+struct FighterRender
+{
   const AnimationFrame& frame;
   Rect destination;
 };

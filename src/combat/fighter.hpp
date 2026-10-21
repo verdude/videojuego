@@ -26,10 +26,10 @@ public:
   {
   }
 
-  MoveState neutral();
-  MoveState punch();
-  MoveState walk();
-  MoveState block();
+  MoveState neutral(bool);
+  MoveState punch(bool);
+  MoveState walk(bool);
+  MoveState block(bool);
 };
 
 class Fighter
