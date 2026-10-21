@@ -17,3 +17,9 @@ AnimationClip::frame(size_t i) const
 {
   return animation_frames.at(i);
 }
+
+uint64_t
+AnimationClip::num_frames() const
+{
+  return animation_frames.size();
+}

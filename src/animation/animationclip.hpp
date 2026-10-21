@@ -24,4 +24,5 @@ public:
   AnimationClip(const char*);
   void insert(AnimationFrame);
   const AnimationFrame& frame(size_t) const;
+  uint64_t num_frames() const;
 };

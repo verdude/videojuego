@@ -11,17 +11,37 @@
 #include <memory>
 #include <vector>
 
+/*
+ * returns nullptr if any animation is missing.
+ * */
 static std::shared_ptr<FighterDefinition>
-init_moves(SpriteSheet* sheet)
+init_fighter_definition(SpriteSheet* sheet)
 {
-  MoveDefinition punch =
-    MoveDefinition(2, 1, 1, 1, false, sheet->get_animation("punch"));
-  MoveDefinition walk =
-    MoveDefinition(2, 1, 1, 1, false, sheet->get_animation("walk"));
-  MoveDefinition neutral =
-    MoveDefinition(2, 1, 1, 1, true, sheet->get_animation("neutral"));
-  MoveDefinition block =
-    MoveDefinition(2, 1, 1, 1, false, sheet->get_animation("block"));
+  auto init_move = [sheet](int dmg, const char* animationtagname) {
+    auto* animation = sheet->get_animation(animationtagname);
+    if (animation == nullptr) {
+      std::cerr << "Failed to initialize move: animation tag '"
+                << animationtagname << "' was not found\n";
+    }
+    return MoveDefinition(static_cast<uint32_t>(dmg), animation);
+  };
+
+  auto punch = init_move(1, "punch");
+  if (punch.get_animation() == nullptr) {
+    return nullptr;
+  }
+  auto walk = init_move(1, "walk");
+  if (walk.get_animation() == nullptr) {
+    return nullptr;
+  }
+  auto neutral = init_move(1, "neutral");
+  if (neutral.get_animation() == nullptr) {
+    return nullptr;
+  }
+  auto block = init_move(1, "block");
+  if (block.get_animation() == nullptr) {
+    return nullptr;
+  }
   return std::make_shared<FighterDefinition>(punch, walk, neutral, block);
 }
 
@@ -29,7 +49,12 @@ static std::shared_ptr<FighterDefinition>
 load_fighter_definition(AssetStore& asset_store, const char* name = "pikachu")
 {
   auto sheet = asset_store.get_sheet(name);
-  return init_moves(sheet);
+  if (sheet == nullptr) {
+    std::cerr << "Failed to load fighter definition: spritesheet '" << name
+              << "' was not found\n";
+    return nullptr;
+  }
+  return init_fighter_definition(sheet);
 }
 
 static bool
@@ -59,8 +84,10 @@ main()
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
-  std::shared_ptr<FighterDefinition> pikachu =
-    load_fighter_definition(asset_store);
+  auto pikachu = load_fighter_definition(asset_store);
+  if (!pikachu) {
+    return 1;
+  }
   FightScene scene = localFight(pikachu, pikachu);
 
   while (true) {

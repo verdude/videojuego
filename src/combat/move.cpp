@@ -2,17 +2,8 @@
 
 #include "../animation/animationclip.hpp"
 
-MoveDefinition::MoveDefinition(uint32_t startup_frames_,
-                               uint32_t active_frames_,
-                               uint32_t recovery_frames_,
-                               uint32_t damage_,
-                               bool loop_,
-                               AnimationClip* animation_)
-  : startup_frames(startup_frames_)
-  , active_frames(active_frames_)
-  , recovery_frames(recovery_frames_)
-  , damage(damage_)
-  , loop(loop_)
+MoveDefinition::MoveDefinition(uint32_t damage_, AnimationClip* animation_)
+  : damage(damage_)
   , animation(animation_)
 {
 }
@@ -23,10 +14,18 @@ MoveDefinition::get_animation() const
   return animation;
 }
 
-uint32_t
+uint64_t
 MoveDefinition::total_frames() const
 {
-  return startup_frames + active_frames + recovery_frames;
+  return animation->num_frames();
+}
+
+MoveState::MoveState(MoveDefinition& move_)
+  : move(move_)
+  , current_frame(0)
+  , started(false)
+  , flip(false)
+{
 }
 
 MoveState::MoveState(MoveDefinition& move_, bool flip_)

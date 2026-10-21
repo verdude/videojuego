@@ -6,27 +6,27 @@
 #include <vector>
 
 MoveState
-FighterDefinition::punch()
+FighterDefinition::punch(bool flip)
 {
-  return MoveState(punch_);
+  return MoveState(punch_, flip);
 }
 
 MoveState
-FighterDefinition::walk()
+FighterDefinition::walk(bool flip)
 {
-  return MoveState(walk_);
+  return MoveState(walk_, flip);
 }
 
 MoveState
-FighterDefinition::neutral()
+FighterDefinition::neutral(bool flip)
 {
-  return MoveState(neutral_);
+  return MoveState(neutral_, flip);
 }
 
 MoveState
-FighterDefinition::block()
+FighterDefinition::block(bool flip)
 {
-  return MoveState(block_);
+  return MoveState(block_, flip);
 }
 
 void
@@ -35,23 +35,6 @@ Fighter::update(const std::vector<FighterCommand>& commands)
   current_move.tick();
   for (auto c : commands) {
     std::cout << "Fighter [" << id << "] responding to command: " << c << "\n";
-    switch (c) {
-      case FighterCommand::MoveLeft:
-        current_move = fighter_definition.walk(true);
-        break;
-      case FighterCommand::MoveRight:
-        current_move = fighter_definition.walk(false);
-        break;
-      case FighterCommand::Punch:
-        current_move = fighter_definition.punch();
-        break;
-      case FighterCommand::Block:
-        current_move = fighter_definition.block();
-        break;
-      default:
-        std::cerr << "got NONE command\n";
-        break;
-    }
   }
 }
 
