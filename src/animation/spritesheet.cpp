@@ -66,3 +66,9 @@ SpriteSheet::get_animation(std::string name)
   auto animation = animations.find(name);
   return animation != animations.end() ? &animation->second : nullptr;
 }
+
+const std::string&
+SpriteSheet::get_path() const
+{
+  return path;
+}

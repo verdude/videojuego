@@ -13,15 +13,16 @@
 
 /*
  * returns nullptr if any animation is missing.
- * */
+ */
 static std::shared_ptr<FighterDefinition>
 init_fighter_definition(SpriteSheet* sheet)
 {
   auto init_move = [sheet](int dmg, const char* animationtagname) {
     auto* animation = sheet->get_animation(animationtagname);
     if (animation == nullptr) {
-      std::cerr << "Failed to initialize move: animation tag '"
-                << animationtagname << "' was not found\n";
+      std::cerr << "Failed to initialize move for spritesheet '"
+                << sheet->get_path() << "': animation tag '" << animationtagname
+                << "' was not found\n";
     }
     return MoveDefinition(static_cast<uint32_t>(dmg), animation);
   };

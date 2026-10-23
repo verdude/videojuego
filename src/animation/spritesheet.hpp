@@ -25,4 +25,5 @@ public:
 
   void load(const Texture*);
   AnimationClip* get_animation(std::string);
+  const std::string& get_path() const;
 };
