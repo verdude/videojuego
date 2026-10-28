@@ -1,93 +1,154 @@
 { "frames": [
    {
-    "filename": "pikachu 0.aseprite",
+    "filename": "neutral-0",
     "frame": { "x": 0, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 43", "bounds": {"x": 4, "y": 4, "w": 5, "h": 3} }, { "name": "Hurtbox 42", "bounds": {"x": 11, "y": 14, "w": 1, "h": 1} }, { "name": "Hurtbox 41", "bounds": {"x": 11, "y": 11, "w": 1, "h": 1} }, { "name": "Hurtbox 40", "bounds": {"x": 6, "y": 7, "w": 5, "h": 8} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 1.aseprite",
-    "frame": { "x": 10, "y": 0, "w": 10, "h": 11 },
+    "filename": "neutral-1",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 39", "bounds": {"x": 4, "y": 4, "w": 5, "h": 3} }, { "name": "Hurtbox 38", "bounds": {"x": 11, "y": 14, "w": 1, "h": 1} }, { "name": "Hurtbox 37", "bounds": {"x": 11, "y": 11, "w": 1, "h": 1} }, { "name": "Hurtbox 36", "bounds": {"x": 6, "y": 7, "w": 5, "h": 8} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 2.aseprite",
-    "frame": { "x": 20, "y": 0, "w": 10, "h": 12 },
+    "filename": "neutral-2",
+    "frame": { "x": 10, "y": 0, "w": 10, "h": 12 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 2, "y": 3, "w": 10, "h": 12 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 35", "bounds": {"x": 4, "y": 3, "w": 5, "h": 3} }, { "name": "Hurtbox 34", "bounds": {"x": 11, "y": 14, "w": 1, "h": 1} }, { "name": "Hurtbox 33", "bounds": {"x": 11, "y": 10, "w": 1, "h": 1} }, { "name": "Hurtbox 32", "bounds": {"x": 6, "y": 6, "w": 5, "h": 9} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 3.aseprite",
-    "frame": { "x": 30, "y": 0, "w": 10, "h": 11 },
+    "filename": "neutral-3",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 31", "bounds": {"x": 8, "y": 6, "w": 1, "h": 1} }, { "name": "Hurtbox 30", "bounds": {"x": 4, "y": 4, "w": 4, "h": 3} }, { "name": "Hurtbox 29", "bounds": {"x": 11, "y": 14, "w": 1, "h": 1} }, { "name": "Hurtbox 28", "bounds": {"x": 11, "y": 11, "w": 1, "h": 1} }, { "name": "Hurtbox 27", "bounds": {"x": 6, "y": 7, "w": 5, "h": 8} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 4.aseprite",
-    "frame": { "x": 40, "y": 0, "w": 12, "h": 11 },
+    "filename": "walk-4",
+    "frame": { "x": 20, "y": 0, "w": 12, "h": 11 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 1, "y": 4, "w": 12, "h": 11 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 26", "bounds": {"x": 6, "y": 4, "w": 5, "h": 3} }, { "name": "Hurtbox 25", "bounds": {"x": 12, "y": 8, "w": 1, "h": 2} }, { "name": "Hurtbox 24", "bounds": {"x": 4, "y": 13, "w": 2, "h": 2} }, { "name": "Hurtbox 23", "bounds": {"x": 4, "y": 7, "w": 8, "h": 6} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 5.aseprite",
-    "frame": { "x": 52, "y": 0, "w": 12, "h": 10 },
+    "filename": "walk-5",
+    "frame": { "x": 32, "y": 0, "w": 12, "h": 10 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 1, "y": 5, "w": 12, "h": 10 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 22", "bounds": {"x": 10, "y": 13, "w": 2, "h": 1} }, { "name": "Hurtbox 21", "bounds": {"x": 3, "y": 13, "w": 2, "h": 2} }, { "name": "Hurtbox 20", "bounds": {"x": 3, "y": 9, "w": 10, "h": 4} }, { "name": "Hurtbox 19", "bounds": {"x": 6, "y": 5, "w": 6, "h": 4} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 6.aseprite",
-    "frame": { "x": 64, "y": 0, "w": 12, "h": 9 },
+    "filename": "walk-6",
+    "frame": { "x": 44, "y": 0, "w": 12, "h": 9 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 1, "y": 6, "w": 12, "h": 9 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 18", "bounds": {"x": 5, "y": 13, "w": 6, "h": 2} }, { "name": "Hurtbox 17", "bounds": {"x": 6, "y": 6, "w": 5, "h": 3} }, { "name": "Hurtbox 16", "bounds": {"x": 3, "y": 9, "w": 10, "h": 4} }],
+    "hitboxes": []
    },
    {
-    "filename": "pikachu 7.aseprite",
-    "frame": { "x": 76, "y": 0, "w": 12, "h": 9 },
+    "filename": "walk-7",
+    "frame": { "x": 44, "y": 0, "w": 12, "h": 9 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 1, "y": 6, "w": 12, "h": 9 },
     "sourceSize": { "w": 16, "h": 16 },
-    "duration": 100
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 15", "bounds": {"x": 5, "y": 13, "w": 6, "h": 2} }, { "name": "Hurtbox 14", "bounds": {"x": 6, "y": 6, "w": 5, "h": 3} }, { "name": "Hurtbox 13", "bounds": {"x": 3, "y": 9, "w": 10, "h": 4} }],
+    "hitboxes": []
+   },
+   {
+    "filename": "punch-8",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 11 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 2, "y": 4, "w": 10, "h": 11 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 12", "bounds": {"x": 4, "y": 4, "w": 4, "h": 3} }, { "name": "Hurtbox 11", "bounds": {"x": 11, "y": 11, "w": 1, "h": 1} }, { "name": "Hurtbox 10", "bounds": {"x": 11, "y": 14, "w": 1, "h": 1} }, { "name": "Hurtbox 9", "bounds": {"x": 6, "y": 7, "w": 5, "h": 8} }],
+    "hitboxes": []
+   },
+   {
+    "filename": "punch-9",
+    "frame": { "x": 56, "y": 0, "w": 10, "h": 11 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 4, "w": 10, "h": 11 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 8", "bounds": {"x": 4, "y": 4, "w": 4, "h": 3} }, { "name": "Hurtbox 7", "bounds": {"x": 3, "y": 8, "w": 2, "h": 3} }, { "name": "Hurtbox 6", "bounds": {"x": 5, "y": 7, "w": 5, "h": 8} }],
+    "hitboxes": []
+   },
+   {
+    "filename": "punch-10",
+    "frame": { "x": 66, "y": 0, "w": 10, "h": 11 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 4, "w": 10, "h": 11 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 5", "bounds": {"x": 2, "y": 8, "w": 2, "h": 3} }, { "name": "Hurtbox 4", "bounds": {"x": 9, "y": 12, "w": 2, "h": 3} }, { "name": "Hurtbox 3", "bounds": {"x": 4, "y": 5, "w": 5, "h": 10} }],
+    "hitboxes": []
+   },
+   {
+    "filename": "punch-11",
+    "frame": { "x": 76, "y": 0, "w": 12, "h": 11 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 2, "y": 4, "w": 12, "h": 11 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100,
+    "hurtboxes": [{ "name": "Hurtbox 2", "bounds": {"x": 12, "y": 10, "w": 2, "h": 2} }, { "name": "Hurtbox 1", "bounds": {"x": 7, "y": 7, "w": 5, "h": 8} }],
+    "hitboxes": [{ "name": "Hitbox 1", "bounds": {"x": 12, "y": 10, "w": 2, "h": 2} }]
    }
  ],
  "meta": {
   "app": "http://www.aseprite.org/",
-  "version": "1.x-dev",
+  "version": "1.x-b3e34acba-dirty-dev",
   "image": "pikachu.png",
   "format": "RGBA8888",
   "size": { "w": 88, "h": 12 },
   "scale": "1",
   "frameTags": [
    { "name": "neutral", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
-   { "name": "walk", "from": 4, "to": 7, "direction": "forward", "color": "#000000ff" }
+   { "name": "walk", "from": 4, "to": 7, "direction": "forward", "color": "#000000ff" },
+   { "name": "punch", "from": 8, "to": 11, "direction": "forward", "color": "#000000ff" }
   ],
   "layers": [
    { "name": "pikachu", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
-   { "name": "Slice 1", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 0, "y": 0, "w": 16, "h": 16 }, "pivot": {"x": 7, "y": 16 } }] }
+   { "name": "pivot", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 7, "y": 14, "w": 1, "h": 1 }, "pivot": {"x": 0, "y": 0 } }] }
   ]
  }
 }
