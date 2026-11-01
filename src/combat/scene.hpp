@@ -34,10 +34,10 @@ public:
 
 namespace fight_scene_detail {
 
-std::array<Command, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildPlayerKeymap();
 
-std::array<Command, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildSecondaryKeymap();
 
 struct FighterRender

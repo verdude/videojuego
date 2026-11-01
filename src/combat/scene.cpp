@@ -6,30 +6,28 @@
 #include "../input/input.hpp"
 
 #include <SDL3/SDL_scancode.h>
-#include <array>
+#include <map>
 #include <iostream>
 
 namespace fight_scene_detail {
 
-std::array<Command, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildPlayerKeymap()
 {
-  std::array<Command, SDL_SCANCODE_COUNT> playerKeymap{};
-  playerKeymap.fill(Command::None);
-  playerKeymap[SDL_SCANCODE_A] = Command::Left;
-  playerKeymap[SDL_SCANCODE_D] = Command::Right;
-  playerKeymap[SDL_SCANCODE_J] = Command::Punch;
+  std::map<Command, SDL_Scancode> playerKeymap{};
+  playerKeymap[Command::Left] = SDL_SCANCODE_A;
+  playerKeymap[Command::Right] = SDL_SCANCODE_D;
+  playerKeymap[Command::Punch] = SDL_SCANCODE_J;
   return playerKeymap;
 }
 
-std::array<Command, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildSecondaryKeymap()
 {
-  std::array<Command, SDL_SCANCODE_COUNT> otherKeymap{};
-  otherKeymap.fill(Command::None);
-  otherKeymap[SDL_SCANCODE_LEFT] = Command::Left;
-  otherKeymap[SDL_SCANCODE_RIGHT] = Command::Right;
-  otherKeymap[SDL_SCANCODE_KP_0] = Command::Punch;
+  std::map<Command, SDL_Scancode> otherKeymap{};
+  otherKeymap[Command::Left] = SDL_SCANCODE_LEFT;
+  otherKeymap[Command::Right] = SDL_SCANCODE_RIGHT;
+  otherKeymap[Command::Punch] = SDL_SCANCODE_KP_0;
   return otherKeymap;
 }
 

@@ -20,7 +20,7 @@ public:
   virtual ~InputController() = default;
   virtual void ingest(const std::vector<SDL_Event>&, uint64_t) = 0;
   virtual void reset() = 0;
-  virtual void update_held_keys() = 0;
+  virtual void update_held_keys(uint64_t) = 0;
 
   const std::vector<Input>& get_commands() const { return commands; }
 };
