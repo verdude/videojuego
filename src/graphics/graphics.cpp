@@ -1,14 +1,12 @@
 #include "graphics.hpp"
 
 #include "../animation/animationclip.hpp"
-#include "texturestore.hpp"
 
 #include <iostream>
 
 Graphics::Graphics()
   : window(nullptr)
   , renderer(nullptr)
-  , texture_store()
 {
 }
 

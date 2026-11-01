@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../geometry/types.hpp"
-#include "texturestore.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -52,7 +51,6 @@ class Graphics
 private:
   Window window;
   Renderer renderer;
-  TextureStore texture_store;
 
 public:
   Graphics();
