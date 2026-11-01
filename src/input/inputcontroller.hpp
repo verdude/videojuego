@@ -4,9 +4,9 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
+#include <array>
 #include <unordered_map>
 #include <vector>
-#include <array>
 
 class InputController
 {

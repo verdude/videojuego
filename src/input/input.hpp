@@ -11,17 +11,23 @@ enum Command
   None,
 };
 
-enum class InputChange { pressed, released };
+enum class InputChange
+{
+  pressed,
+  released
+};
 
 using Tick = uint64_t;
 
-struct Input {
+struct Input
+{
   Command command;
   InputChange change;
   Tick tick;
 };
 
-struct HeldState {
+struct HeldState
+{
   bool down = false;
   Tick tick;
 };

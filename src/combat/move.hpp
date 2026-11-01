@@ -1,9 +1,9 @@
 #pragma once
 
-#include <optional>
-
 #include "../animation/animationclip.hpp"
 #include "../input/input.hpp"
+
+#include <optional>
 
 class MoveDefinition
 {

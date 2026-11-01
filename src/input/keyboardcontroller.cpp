@@ -11,19 +11,19 @@ KeyboardController::ingest(const std::vector<SDL_Event>& events, uint64_t tick)
   for (auto event : events) {
     if ((event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) &&
         keymap[event.key.scancode] != Command::None) {
-      commands.push_back(
-        Input{
-          .command = keymap[event.key.scancode],
-          .change = event.type == SDL_EVENT_KEY_DOWN ? InputChange::pressed : InputChange::released,
-          .tick = tick,
-        }
-      );
+      commands.push_back(Input{
+        .command = keymap[event.key.scancode],
+        .change = event.type == SDL_EVENT_KEY_DOWN ? InputChange::pressed
+                                                   : InputChange::released,
+        .tick = tick,
+      });
     }
   }
 }
 
 void
-KeyboardController::update_held_keys(uint64_t tick) {
+KeyboardController::update_held_keys(uint64_t tick)
+{
   const bool* keys = SDL_GetKeyboardState(nullptr);
   held[Command::Left] = HeldState{
     .down = keys[scancodes[Command::Left]],

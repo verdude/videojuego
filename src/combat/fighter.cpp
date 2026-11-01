@@ -34,7 +34,8 @@ Fighter::update(const std::vector<Input>& commands)
 {
   current_move.tick();
   for (auto c : commands) {
-    std::cout << "Fighter [" << id << "] responding to command: " << c.command << "\n";
+    std::cout << "Fighter [" << id << "] responding to command: " << c.command
+              << "\n";
   }
 }
 

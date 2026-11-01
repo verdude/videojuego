@@ -21,7 +21,8 @@ MoveDefinition::total_frames() const
 }
 
 std::optional<MoveDefinition>
-MoveDefinition::next() const {
+MoveDefinition::next() const
+{
   return std::nullopt;
 }
 

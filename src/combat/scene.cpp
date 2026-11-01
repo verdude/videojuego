@@ -1,13 +1,13 @@
 #include "scene.hpp"
 
 #include "../geometry/types.hpp"
+#include "../input/input.hpp"
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
-#include "../input/input.hpp"
 
 #include <SDL3/SDL_scancode.h>
-#include <map>
 #include <iostream>
+#include <map>
 
 namespace fight_scene_detail {
 
