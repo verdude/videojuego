@@ -67,14 +67,16 @@ void
 FightScene::ingest(const std::vector<SDL_Event>& events)
 {
   playerController->ingest(events, sim_tick);
+  playerController->update_held_keys(sim_tick);
   otherController->ingest(events, sim_tick);
+  otherController->update_held_keys(sim_tick);
 }
 
 void
 FightScene::update()
 {
-  player.update(playerController->get_commands());
-  other.update(otherController->get_commands());
+  player.update(playerController->get_commands(), playerController->get_held());
+  other.update(otherController->get_commands(), otherController->get_held());
   ++sim_tick;
 }
 

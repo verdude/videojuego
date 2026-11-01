@@ -30,7 +30,8 @@ FighterDefinition::block(bool flip)
 }
 
 void
-Fighter::update(const std::vector<Input>& commands)
+Fighter::update(const std::vector<Input>& commands,
+                const std::array<HeldState, Command::Count>& held)
 {
   current_move.tick();
   for (auto c : commands) {
