@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../geometry/types.hpp"
-#include "../input/input.hpp"
 #include "../input/held.hpp"
+#include "../input/input.hpp"
 #include "move.hpp"
 
 #include <array>

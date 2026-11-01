@@ -111,7 +111,8 @@ main()
         return 0;
       } else {
         // debugging
-        // std::cout << "Event received: " << SDL_GetScancodeName(event.key.scancode) << std::endl;
+        // std::cout << "Event received: " <<
+        // SDL_GetScancodeName(event.key.scancode) << std::endl;
         events.push_back(event);
       }
     }

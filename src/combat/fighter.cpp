@@ -1,7 +1,7 @@
 #include "fighter.hpp"
 
-#include "../input/input.hpp"
 #include "../input/held.hpp"
+#include "../input/input.hpp"
 
 #include <iostream>
 #include <vector>
@@ -31,8 +31,7 @@ FighterDefinition::block(bool flip)
 }
 
 void
-Fighter::update(const std::vector<Input>& commands,
-                const Held& held)
+Fighter::update(const std::vector<Input>& commands, const Held& held)
 {
   current_move.tick();
 

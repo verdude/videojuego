@@ -31,8 +31,5 @@ struct HeldState
   bool down = false;
   Tick tick;
 
-  bool operator!=(const HeldState& other) const
-  {
-    return other.down != down;
-  }
+  bool operator!=(const HeldState& other) const { return other.down != down; }
 };

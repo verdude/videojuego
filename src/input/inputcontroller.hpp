@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../input/input.hpp"
 #include "../input/held.hpp"
+#include "../input/input.hpp"
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>

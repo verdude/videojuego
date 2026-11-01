@@ -51,8 +51,8 @@ MoveState::MoveState(MoveDefinition& move_, bool flip_)
 const AnimationFrame&
 MoveState::frame() const
 {
-  // Clamp the index to the last valid frame so completed moves keep their final pose.
-  // Otherwise, we accidentally return an invalid frame, which crashes.
+  // Clamp the index to the last valid frame so completed moves keep their final
+  // pose. Otherwise, we accidentally return an invalid frame, which crashes.
   return move.get_animation()->frame(
     std::min(current_frame, move.total_frames() - 1));
 }

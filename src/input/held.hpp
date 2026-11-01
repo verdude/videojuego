@@ -2,13 +2,14 @@
 
 #include "input.hpp"
 
-#include <array>
-#include <map>
-#include <cstdint>
-#include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_scancode.h>
+#include <array>
+#include <cstdint>
+#include <map>
 
-class Held {
+class Held
+{
 private:
   std::array<HeldState, Command::Count> held{};
 
