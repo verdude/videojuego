@@ -37,8 +37,8 @@ Fighter::update(const std::vector<Input>& commands,
   current_move.tick();
 
   constexpr int movement_per_tick = 5;
-  const int direction = static_cast<int>(held.held[Command::Right].down) -
-                        static_cast<int>(held.held[Command::Left].down);
+  const int direction = static_cast<int>(held[Command::Right].down) -
+                        static_cast<int>(held[Command::Left].down);
   anchor.x += direction * movement_per_tick;
 
   for (const auto& input : commands) {

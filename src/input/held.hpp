@@ -9,9 +9,10 @@
 #include <SDL3/SDL_events.h>
 
 class Held {
-public:
+private:
   std::array<HeldState, Command::Count> held{};
 
+public:
   /**
    * Update all the currently held keys
    *
@@ -21,7 +22,8 @@ public:
   void update(std::map<Command, SDL_Scancode>&, uint64_t);
 
   /**
-   * Return true if each element in held is equal.
+   * Return true if the same set of commands are held in both objects.
    */
-  bool operator==(Held&) const;
+  bool operator==(const Held&) const;
+  const HeldState& operator[](size_t) const;
 };
