@@ -1,6 +1,6 @@
 #include "fighter.hpp"
 
-#include "fightercommand.hpp"
+#include "../input/input.hpp"
 
 #include <iostream>
 #include <vector>
@@ -30,26 +30,24 @@ FighterDefinition::block(bool flip)
 }
 
 void
-Fighter::update(const std::vector<FighterCommand>& commands)
+Fighter::update(const std::vector<Input>& commands,
+                const std::array<HeldState, Command::Count>& held)
 {
   current_move.tick();
-  for (auto c : commands) {
-    std::cout << "Fighter [" << id << "] responding to command: " << c << "\n";
-    // TODO: Implement command handling logic here
-    if (c == FighterCommand::Punch) {
+
+  constexpr int movement_per_tick = 5;
+  const int direction = static_cast<int>(held[Command::Right].down) -
+                        static_cast<int>(held[Command::Left].down);
+  anchor.x += direction * movement_per_tick;
+
+  for (const auto& input : commands) {
+    if (input.change != InputChange::pressed) {
+      continue;
+    }
+
+    if (input.command == Command::Punch) {
       // TODO: Punch
       std::cout << "Fighter [" << id << "] executing PUNCH move\n";
-    } else if (c == FighterCommand::MoveLeft) {
-      // Move LEFT
-      std::cout << "Fighter [" << id << "] executing MOVE LEFT\n";
-      this->anchor.x -= 5; // Move left by 5 units
-    } else if (c == FighterCommand::MoveRight) {
-      // Move RIGHT
-      std::cout << "Fighter [" << id << "] executing MOVE RIGHT\n";
-      this->anchor.x += 5; // Move right by 5 units
-    } else if (c == FighterCommand::Block) {
-      // Block
-      std::cout << "Fighter [" << id << "] executing BLOCK move\n";
     }
   }
 }

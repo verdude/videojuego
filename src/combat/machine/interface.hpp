@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../fightercommand.hpp"
+#include "../../input/input.hpp"
 
 #include <memory>
 #include <vector>
@@ -10,5 +10,5 @@ class FighterStateMachine
 public:
   virtual ~FighterStateMachine() = default;
   virtual std::unique_ptr<FighterStateMachine> transition(
-    const std::vector<FighterCommand>&) = 0;
+    const std::vector<Input>&) = 0;
 };

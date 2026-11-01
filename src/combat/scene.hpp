@@ -12,6 +12,8 @@
 class FightScene
 {
 private:
+  uint64_t sim_tick = 0;
+
   Fighter player;
   Fighter other;
 
@@ -32,10 +34,10 @@ public:
 
 namespace fight_scene_detail {
 
-std::array<FighterCommand, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildPlayerKeymap();
 
-std::array<FighterCommand, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildSecondaryKeymap();
 
 struct FighterRender

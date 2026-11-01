@@ -1,35 +1,33 @@
 #include "scene.hpp"
 
 #include "../geometry/types.hpp"
+#include "../input/input.hpp"
 #include "../input/keyboardcontroller.hpp"
 #include "fighter.hpp"
-#include "fightercommand.hpp"
 
 #include <SDL3/SDL_scancode.h>
-#include <array>
 #include <iostream>
+#include <map>
 
 namespace fight_scene_detail {
 
-std::array<FighterCommand, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildPlayerKeymap()
 {
-  std::array<FighterCommand, SDL_SCANCODE_COUNT> playerKeymap{};
-  playerKeymap.fill(FighterCommand::None);
-  playerKeymap[SDL_SCANCODE_A] = FighterCommand::MoveLeft;
-  playerKeymap[SDL_SCANCODE_D] = FighterCommand::MoveRight;
-  playerKeymap[SDL_SCANCODE_J] = FighterCommand::Punch;
+  std::map<Command, SDL_Scancode> playerKeymap{};
+  playerKeymap[Command::Left] = SDL_SCANCODE_A;
+  playerKeymap[Command::Right] = SDL_SCANCODE_D;
+  playerKeymap[Command::Punch] = SDL_SCANCODE_J;
   return playerKeymap;
 }
 
-std::array<FighterCommand, SDL_SCANCODE_COUNT>
+std::map<Command, SDL_Scancode>
 buildSecondaryKeymap()
 {
-  std::array<FighterCommand, SDL_SCANCODE_COUNT> otherKeymap{};
-  otherKeymap.fill(FighterCommand::None);
-  otherKeymap[SDL_SCANCODE_LEFT] = FighterCommand::MoveLeft;
-  otherKeymap[SDL_SCANCODE_RIGHT] = FighterCommand::MoveRight;
-  otherKeymap[SDL_SCANCODE_KP_0] = FighterCommand::Punch;
+  std::map<Command, SDL_Scancode> otherKeymap{};
+  otherKeymap[Command::Left] = SDL_SCANCODE_LEFT;
+  otherKeymap[Command::Right] = SDL_SCANCODE_RIGHT;
+  otherKeymap[Command::Punch] = SDL_SCANCODE_KP_0;
   return otherKeymap;
 }
 
@@ -68,15 +66,18 @@ FightScene::start()
 void
 FightScene::ingest(const std::vector<SDL_Event>& events)
 {
-  playerController->ingest(events);
-  otherController->ingest(events);
+  playerController->ingest(events, sim_tick);
+  playerController->update_held_keys(sim_tick);
+  otherController->ingest(events, sim_tick);
+  otherController->update_held_keys(sim_tick);
 }
 
 void
 FightScene::update()
 {
-  player.update(playerController->get_commands());
-  other.update(otherController->get_commands());
+  player.update(playerController->get_commands(), playerController->get_held());
+  other.update(otherController->get_commands(), otherController->get_held());
+  ++sim_tick;
 }
 
 void
