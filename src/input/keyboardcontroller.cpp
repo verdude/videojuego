@@ -26,19 +26,7 @@ KeyboardController::ingest(const std::vector<SDL_Event>& events, uint64_t tick)
 void
 KeyboardController::update_held_keys(uint64_t tick)
 {
-  const bool* keys = SDL_GetKeyboardState(nullptr);
-  held[Command::Left] = HeldState{
-    .down = keys[scancodes[Command::Left]],
-    .tick = tick,
-  };
-  held[Command::Right] = HeldState{
-    .down = keys[scancodes[Command::Right]],
-    .tick = tick,
-  };
-  held[Command::Punch] = HeldState{
-    .down = keys[scancodes[Command::Punch]],
-    .tick = tick,
-  };
+  held.update(scancodes, tick);
 }
 
 void

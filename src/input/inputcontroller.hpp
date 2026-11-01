@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../input/input.hpp"
+#include "../input/held.hpp"
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
@@ -16,7 +17,7 @@ protected:
   std::vector<Input> commands;
   // TODO: Move out and replace with array
   std::vector<Input> history;
-  std::array<HeldState, Command::Count> held{};
+  Held held;
 
 public:
   virtual ~InputController() = default;
@@ -25,5 +26,6 @@ public:
   virtual void update_held_keys(uint64_t) = 0;
 
   const std::vector<Input>& get_commands() const { return commands; }
-  const std::array<HeldState, Command::Count>& get_held() const { return held; }
+  const std::vector<Input>& get_history() const { return history; }
+  const Held& get_held() const { return held; }
 };

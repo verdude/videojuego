@@ -2,6 +2,7 @@
 
 #include "../geometry/types.hpp"
 #include "../input/input.hpp"
+#include "../input/held.hpp"
 #include "move.hpp"
 
 #include <array>
@@ -50,8 +51,7 @@ public:
     , current_move(who->neutral())
   {
   }
-  void update(const std::vector<Input>&,
-              const std::array<HeldState, Command::Count>&);
+  void update(const std::vector<Input>&, const Held&);
   const AnimationFrame& frame() const;
   const Vec2& get_anchor() const;
 };

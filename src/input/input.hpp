@@ -30,4 +30,9 @@ struct HeldState
 {
   bool down = false;
   Tick tick;
+
+  bool operator!=(HeldState& other) const
+  {
+    return other.down != down;
+  }
 };
