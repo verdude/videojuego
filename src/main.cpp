@@ -105,13 +105,7 @@ main()
     simulatable_time += elapsed_time;
 
     SDL_Event event;
-    /*  
-     *  Store keypresses in the `events` queue until they can be procssed
-     *  TODO: In the future, we will likely want to process events such that
-     *  we can handle simultaneous / concurrent keypresses or holding keys down. 
-     *  (Idea: Process keydown events on every tick until its corresponding
-     *   keyup event is received.)
-     */
+    // Store keypresses in the `events` queue until they can be procssed
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) {
         return 0;
