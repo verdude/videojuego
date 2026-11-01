@@ -19,7 +19,7 @@ Graphics::init()
   }
 
   if (!SDL_CreateWindowAndRenderer(
-        "Game", 800, 800, 0, &window.w, &renderer.r)) {
+        "Game", 800, 400, 0, &window.w, &renderer.r)) {
     std::cerr << "Failed to create window and renderer: " << SDL_GetError()
               << "\n";
     return false;
@@ -27,6 +27,10 @@ Graphics::init()
 
   if (!SDL_SetRenderVSync(renderer.r, 1)) {
     std::cerr << "vsync unsupported" << SDL_GetError() << "\n";
+  }
+
+  if (!SDL_SetRenderScale(renderer.r, 3, 3)) {
+    std::cerr << "Scale failed\n" << SDL_GetError() << "\n";
   }
 
   return true;

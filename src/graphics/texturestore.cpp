@@ -16,6 +16,7 @@ TextureStore::load_from_file(const char* path, SDL_Renderer* renderer)
   if (!t) {
     return { false, 0 };
   }
+  SDL_SetTextureScaleMode(t, SDL_SCALEMODE_NEAREST);
   const auto key = textures.size();
   textures.insert({ key, Texture{ path, t } });
   return { true, key };
