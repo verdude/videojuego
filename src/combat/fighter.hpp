@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../geometry/types.hpp"
-#include "fightercommand.hpp"
+#include "../input/input.hpp"
 #include "move.hpp"
 
 #include <memory>
@@ -49,7 +49,7 @@ public:
     , current_move(who->neutral())
   {
   }
-  void update(const std::vector<FighterCommand>&);
+  void update(const std::vector<Input>&);
   const AnimationFrame& frame() const;
   const Vec2& get_anchor() const;
 };

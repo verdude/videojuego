@@ -39,7 +39,7 @@ init_fighter_definition(SpriteSheet* sheet)
   if (neutral.get_animation() == nullptr) {
     return nullptr;
   }
-  auto block = init_move(1, "block");
+  auto block = init_move(1, "neutral");
   if (block.get_animation() == nullptr) {
     return nullptr;
   }

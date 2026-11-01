@@ -1,22 +1,26 @@
 #pragma once
 
-#include "../combat/fightercommand.hpp"
+#include "../input/input.hpp"
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
 #include <unordered_map>
 #include <vector>
+#include <array>
 
 class InputController
 {
 protected:
-  std::vector<FighterCommand> commands;
+  std::vector<Input> commands;
+  // TODO: Move out
+  std::vector<Input> history;
+  std::array<HeldState, static_cast<size_t>(Command::Count)> held{};
 
 public:
   virtual ~InputController() = default;
-  virtual void ingest(const std::vector<SDL_Event>&) = 0;
-  virtual void ingest(SDL_Event) = 0;
+  virtual void ingest(const std::vector<SDL_Event>&, uint64_t) = 0;
   virtual void reset() = 0;
+  virtual void update_held_keys() = 0;
 
-  const std::vector<FighterCommand>& get_commands() const { return commands; }
+  const std::vector<Input>& get_commands() const { return commands; }
 };

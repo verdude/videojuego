@@ -20,6 +20,11 @@ MoveDefinition::total_frames() const
   return animation->num_frames();
 }
 
+std::optional<MoveDefinition>
+MoveDefinition::next() const {
+  return std::nullopt;
+}
+
 MoveState::MoveState(MoveDefinition& move_)
   : move(move_)
   , current_frame(0)

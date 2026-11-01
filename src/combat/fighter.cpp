@@ -1,6 +1,6 @@
 #include "fighter.hpp"
 
-#include "fightercommand.hpp"
+#include "../input/input.hpp"
 
 #include <iostream>
 #include <vector>
@@ -30,11 +30,11 @@ FighterDefinition::block(bool flip)
 }
 
 void
-Fighter::update(const std::vector<FighterCommand>& commands)
+Fighter::update(const std::vector<Input>& commands)
 {
   current_move.tick();
   for (auto c : commands) {
-    std::cout << "Fighter [" << id << "] responding to command: " << c << "\n";
+    std::cout << "Fighter [" << id << "] responding to command: " << c.command << "\n";
   }
 }
 

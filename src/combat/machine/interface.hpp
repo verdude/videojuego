@@ -5,5 +5,5 @@ class FighterStateMachine
 public:
   virtual FighterCombatState() = default;
   virtual const FighterStateMachine transition(
-    const std::vector<FighterCommand>&) = 0;
+    const std::vector<Command>&) = 0;
 };
