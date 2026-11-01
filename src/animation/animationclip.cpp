@@ -13,12 +13,12 @@ AnimationClip::insert(AnimationFrame frame)
 }
 
 const AnimationFrame&
-AnimationClip::frame(size_t i) const
+AnimationClip::frame(std::size_t i) const
 {
   return animation_frames.at(i);
 }
 
-uint64_t
+std::size_t
 AnimationClip::num_frames() const
 {
   return animation_frames.size();

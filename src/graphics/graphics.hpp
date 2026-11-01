@@ -16,6 +16,9 @@ public:
     : r(renderer)
   {
   }
+  Renderer(const Renderer&) = delete;
+  Renderer& operator=(const Renderer&) = delete;
+
   ~Renderer()
   {
     if (r) {
@@ -33,6 +36,9 @@ public:
     : w(window)
   {
   }
+  Window(const Window&) = delete;
+  Window& operator=(const Window&) = delete;
+
   ~Window()
   {
     if (w) {
@@ -47,8 +53,6 @@ private:
   Window window;
   Renderer renderer;
   TextureStore texture_store;
-
-  bool initTextures();
 
 public:
   Graphics();

@@ -28,7 +28,8 @@ private:
 public:
   TextureStore();
   ~TextureStore();
-  bool init(SDL_Renderer*&);
+  TextureStore(const TextureStore&) = delete;
+  TextureStore& operator=(const TextureStore&) = delete;
   LoadTextureResult load_from_file(const char*, SDL_Renderer*);
   const Texture* get(size_t) const;
 };

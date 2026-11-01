@@ -24,7 +24,7 @@ init_fighter_definition(SpriteSheet* sheet)
                 << sheet->get_path() << "': animation tag '" << animationtagname
                 << "' was not found\n";
     }
-    return MoveDefinition(static_cast<uint32_t>(dmg), animation);
+    return MoveDefinition(static_cast<std::uint32_t>(dmg), animation);
   };
 
   auto punch = init_move(1, "punch");
@@ -85,12 +85,18 @@ main()
   double tick_duration = 1.0 / 60;
   auto simulatable_time = 0.0;
 
+  // Load a fighter
   auto pikachu = load_fighter_definition(asset_store);
   if (!pikachu) {
     return 1;
   }
+
+  // Set up a fight scene with two fighters
   FightScene scene = localFight(pikachu, pikachu);
 
+  //////////////////////////
+  //    Main game loop    //
+  //////////////////////////
   while (true) {
     auto new_time = Clock::now();
     double elapsed_time =
@@ -99,16 +105,24 @@ main()
     simulatable_time += elapsed_time;
 
     SDL_Event event;
-    // TODO: when to clear events
+    /*  
+     *  Store keypresses in the `events` queue until they can be procssed
+     *  TODO: In the future, we will likely want to process events such that
+     *  we can handle simultaneous / concurrent keypresses or holding keys down. 
+     *  (Idea: Process keydown events on every tick until its corresponding
+     *   keyup event is received.)
+     */
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) {
         return 0;
       } else {
-        // collect events
+        // debugging
+        // std::cout << "Event received: " << SDL_GetScancodeName(event.key.scancode) << std::endl;
         events.push_back(event);
       }
     }
 
+    // process keypresses (i.e. events) and update the scene
     while (simulatable_time >= tick_duration) {
       scene.ingest(events);
       events.clear();
@@ -116,7 +130,7 @@ main()
       simulatable_time -= tick_duration;
     }
 
-    // render
+    // render the scene
     graphics.clear();
     scene.render(graphics, asset_store);
     graphics.debug("welcome", false);

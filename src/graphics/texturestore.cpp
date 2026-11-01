@@ -25,7 +25,7 @@ void
 TextureStore::cleanup()
 {
   for (auto& p : textures) {
-    if (p.second.texture != NULL) {
+    if (p.second.texture != nullptr) {
       SDL_DestroyTexture(p.second.texture);
     }
   }
@@ -43,7 +43,7 @@ TextureStore::~TextureStore()
 }
 
 const Texture*
-TextureStore::get(size_t key) const
+TextureStore::get(std::size_t key) const
 {
   auto texture = textures.find(key);
   return texture != textures.end() ? &texture->second : nullptr;

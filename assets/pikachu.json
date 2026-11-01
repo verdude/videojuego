@@ -140,8 +140,9 @@
   "size": { "w": 88, "h": 12 },
   "scale": "1",
   "frameTags": [
-   { "name": "neutral", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
-   { "name": "walk", "from": 4, "to": 7, "direction": "forward", "color": "#000000ff" },
+    { "name": "neutral", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
+    { "name": "block", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
+    { "name": "walk", "from": 4, "to": 7, "direction": "forward", "color": "#000000ff" },
    { "name": "punch", "from": 8, "to": 11, "direction": "forward", "color": "#000000ff" }
   ],
   "layers": [

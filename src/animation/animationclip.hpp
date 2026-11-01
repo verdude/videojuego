@@ -3,6 +3,8 @@
 #include "../geometry/types.hpp"
 #include "../graphics/texturestore.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -23,6 +25,6 @@ private:
 public:
   AnimationClip(const char*);
   void insert(AnimationFrame);
-  const AnimationFrame& frame(size_t) const;
-  uint64_t num_frames() const;
+  const AnimationFrame& frame(std::size_t) const;
+  std::size_t num_frames() const;
 };
