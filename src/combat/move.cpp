@@ -35,7 +35,6 @@ MoveDefinition::next() const
 MoveState::MoveState(MoveDefinition& move_)
   : move(move_)
   , current_frame(0)
-  , started(false)
   , flip(false)
 {
 }
@@ -43,7 +42,6 @@ MoveState::MoveState(MoveDefinition& move_)
 MoveState::MoveState(MoveDefinition& move_, bool flip_)
   : move(move_)
   , current_frame(0)
-  , started(false)
   , flip(flip_)
 {
 }
@@ -66,11 +64,8 @@ MoveState::complete() const
 void
 MoveState::tick()
 {
-  if (started) {
-    // Stop at completion so repeated ticks cannot overflow the frame counter.
-    if (!complete()) {
-      ++current_frame;
-    }
-  } else
-    started = true;
+  // Stop at completion so repeated ticks cannot overflow the frame counter.
+  if (!complete()) {
+    ++current_frame;
+  } else current_frame = 0;
 }

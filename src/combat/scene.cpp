@@ -75,8 +75,14 @@ FightScene::ingest(const std::vector<SDL_Event>& events)
 void
 FightScene::update()
 {
-  player.update(playerController->get_commands(), playerController->get_held());
-  other.update(otherController->get_commands(), otherController->get_held());
+  player.update(
+    playerController->get_commands(),
+    playerController->get_held()
+  );
+  other.update(
+    otherController->get_commands(),
+    otherController->get_held()
+  );
   ++sim_tick;
 }
 

@@ -33,8 +33,6 @@ FighterDefinition::block(bool flip)
 void
 Fighter::update(const std::vector<Input>& commands, const Held& held)
 {
-  current_move.tick();
-
   constexpr int movement_per_tick = 5;
   const int direction = static_cast<int>(held[Command::Right].down) -
                         static_cast<int>(held[Command::Left].down);
@@ -50,6 +48,7 @@ Fighter::update(const std::vector<Input>& commands, const Held& held)
       std::cout << "Fighter [" << id << "] executing PUNCH move\n";
     }
   }
+  current_move.tick();
 }
 
 const AnimationFrame&

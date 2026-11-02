@@ -21,7 +21,6 @@ class MoveState
 {
   MoveDefinition& move;
   size_t current_frame;
-  bool started;
   bool flip;
 
 public:
