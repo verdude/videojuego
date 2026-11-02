@@ -35,6 +35,7 @@ MoveDefinition::next() const
 MoveState::MoveState(MoveDefinition& move_)
   : move(move_)
   , current_frame(0)
+  , frame_millis(0)
   , flip(false)
 {
 }
@@ -42,6 +43,7 @@ MoveState::MoveState(MoveDefinition& move_)
 MoveState::MoveState(MoveDefinition& move_, bool flip_)
   : move(move_)
   , current_frame(0)
+  , frame_millis(0)
   , flip(flip_)
 {
 }
@@ -65,7 +67,17 @@ void
 MoveState::tick()
 {
   // Stop at completion so repeated ticks cannot overflow the frame counter.
-  if (!complete()) {
+  if (complete()) {
+    frame_millis = 0;
+    current_frame = 0;
+    return;
+  }
+
+  // TODO: no magic
+  frame_millis += 1000/60;
+  auto duration = frame().duration;
+  if (frame_millis >= duration) {
     ++current_frame;
-  } else current_frame = 0;
+    frame_millis -= duration;
+  }
 }

@@ -11,7 +11,7 @@
 struct AnimationFrame
 {
   int x, y, w, h, sourceW, sourceH, spriteSourceX, spriteSourceY, spriteSourceW,
-    spriteSourceH;
+    spriteSourceH, duration;
   Vec2 drawOffset;
   const Texture* texture;
 };

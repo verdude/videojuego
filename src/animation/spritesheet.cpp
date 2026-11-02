@@ -51,6 +51,7 @@ SpriteSheet::load(const Texture* texture)
         .spriteSourceY = sprite_source.at("y"),
         .spriteSourceW = sprite_source.at("w"),
         .spriteSourceH = sprite_source.at("h"),
+        .duration = frame.at("duration"),
         .drawOffset = { sprite_source.at("x").get<int>() - pivot.x,
                         sprite_source.at("y").get<int>() - pivot.y },
         .texture = texture,
