@@ -36,8 +36,9 @@ Every move will have multiple phases. For example:
 - recovery
 
 Only the `active` phase will contains hitboxes that do damage. An AnimationClip
-(src/animation/animationclip.hpp) is the full animation for the move and will be rendered at 1
-frame per simulation tick. The `MoveState` class in `src/combat/move.hpp` keeps track of which frame
+(src/animation/animationclip.hpp) is the full animation for the move and will be rendered according
+to the frame duration as specified in the aseprite export.
+The `MoveState` class in `src/combat/move.hpp` keeps track of which frame
 should be rendered in the current tick. It is held by the `Fighter` in `src/combat/fighter.hpp`.
 
 Active phases are currently deduced by the presence of a hitbox.
