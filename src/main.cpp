@@ -2,7 +2,6 @@
 #include "combat/fighter.hpp"
 #include "combat/scene.hpp"
 #include "graphics/graphics.hpp"
-#include "input/inputcontroller.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>

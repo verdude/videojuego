@@ -33,7 +33,7 @@ FighterDefinition::block(bool flip)
 void
 Fighter::update(const std::vector<Input>& commands, const Held& held)
 {
-  constexpr int movement_per_tick = 5;
+  constexpr int movement_per_tick = 1;
   const int direction = static_cast<int>(held[Command::Right].down) -
                         static_cast<int>(held[Command::Left].down);
   anchor.x += direction * movement_per_tick;

@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+using Tick = uint64_t;
+
 enum Command
 {
   Left,
@@ -16,8 +18,6 @@ enum class InputChange
   pressed,
   released
 };
-
-using Tick = uint64_t;
 
 struct Input
 {

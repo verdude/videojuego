@@ -3,6 +3,7 @@
 #include "../geometry/types.hpp"
 #include "../input/input.hpp"
 #include "../input/keyboardcontroller.hpp"
+#include "commandrecognizer.hpp"
 #include "fighter.hpp"
 
 #include <SDL3/SDL_scancode.h>
