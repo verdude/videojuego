@@ -1,16 +1,12 @@
 #include "held.hpp"
 
 void
-Held::update(std::map<Command, SDL_Scancode>& scancodes, uint64_t tick)
+Held::update(Command command, bool down, uint64_t tick)
 {
-  const bool* keys = SDL_GetKeyboardState(nullptr);
-#pragma GCC unroll Command::Count
-  for (const auto& [key, value] : scancodes) {
-    held[key] = HeldState{
-      .down = keys[value],
-      .tick = tick,
-    };
-  }
+  held[command] = HeldState{
+    .down = down,
+    .tick = tick,
+  };
 }
 
 bool

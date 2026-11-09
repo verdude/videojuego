@@ -5,7 +5,6 @@
 #include "../input/input.hpp"
 #include "move.hpp"
 
-#include <array>
 #include <memory>
 #include <vector>
 

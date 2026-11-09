@@ -74,7 +74,7 @@ MoveState::tick()
   }
 
   // TODO: no magic
-  frame_millis += 1000/60;
+  frame_millis += 1000.0 / 60.0;
   auto duration = frame().duration;
   if (frame_millis >= duration) {
     ++current_frame;

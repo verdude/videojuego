@@ -20,7 +20,7 @@ public:
    * @param Map of Command -> Scancode. Reverse keymap. SDL Specific.
    * @param uint64_t tick number
    */
-  void update(std::map<Command, SDL_Scancode>&, uint64_t);
+  void update(Command, bool, uint64_t);
 
   /**
    * Return true if the same set of commands are held in both objects.

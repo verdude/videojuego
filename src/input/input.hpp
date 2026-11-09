@@ -33,3 +33,13 @@ struct HeldState
 
   bool operator!=(const HeldState& other) const { return other.down != down; }
 };
+
+struct Chord
+{
+  enum InputState
+  {
+    Up,
+    Down,
+    Any,
+  };
+};
