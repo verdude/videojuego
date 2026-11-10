@@ -73,3 +73,8 @@ target_link_libraries(game PRIVATE
     nlohmann_json::nlohmann_json
 )
 #target_link_libraries(game PRIVATE flecs::flecs_static)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

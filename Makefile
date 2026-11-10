@@ -7,7 +7,7 @@ else
 	endif
 endif
 
-.PHONY: build debug reldebug release clean
+.PHONY: build debug reldebug release clean test
 
 debug:
 	cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug $(CMAKE_FLAGS)
@@ -25,6 +25,11 @@ clean:
 	-make -C build/release clean
 	-make -C build/debug clean
 	-make -C build/reldebug clean
+
+test:
+	cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON $(CMAKE_FLAGS)
+	cmake --build build/debug --target cmd_recognizer_tests
+	ctest --test-dir build/debug --output-on-failure $(CTEST_FLAGS)
 
 all: debug reldebug release
 
