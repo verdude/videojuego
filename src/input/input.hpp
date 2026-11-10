@@ -1,17 +1,21 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 using Tick = uint64_t;
 
-enum Command
+enum Control
 {
   Left,
   Right,
-  Punch,
+  One,
   Count,
   None,
 };
+
+Control
+control_from_string(const std::string&);
 
 enum class InputChange
 {
@@ -21,7 +25,7 @@ enum class InputChange
 
 struct Input
 {
-  Command command;
+  Control command;
   InputChange change;
   Tick tick;
 };

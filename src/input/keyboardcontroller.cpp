@@ -10,8 +10,8 @@ KeyboardController::ingest(const std::vector<SDL_Event>& events, uint64_t tick)
   commands.clear();
   for (auto event : events) {
     if ((event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) &&
-        keymap[event.key.scancode] != Command::None && !event.key.repeat) {
-      Command command = keymap[event.key.scancode];
+        keymap[event.key.scancode] != Control::None && !event.key.repeat) {
+      Control command = keymap[event.key.scancode];
       Input input = Input{
         .command = command,
         .change = event.type == SDL_EVENT_KEY_DOWN ? InputChange::pressed

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "scene.hpp"
 #include "../animation/assetstore.hpp"
 #include "../graphics/graphics.hpp"
 #include "../input/inputcontroller.hpp"
 #include "../input/keyboardcontroller.hpp"
+#include "commandrecognizer.hpp"
 #include "fighter.hpp"
 
 #include <memory>
@@ -17,8 +19,10 @@ private:
   Fighter player;
   Fighter other;
 
-  std::unique_ptr<InputController> playerController;
-  std::unique_ptr<InputController> otherController;
+  std::unique_ptr<InputController> player_controller;
+  std::unique_ptr<InputController> other_controller;
+
+  CommandRecognizer cmd_recognizer;
 
 public:
   FightScene(std::unique_ptr<InputController>,
@@ -34,10 +38,10 @@ public:
 
 namespace fight_scene_detail {
 
-std::map<Command, SDL_Scancode>
+std::map<Control, SDL_Scancode>
 buildPlayerKeymap();
 
-std::map<Command, SDL_Scancode>
+std::map<Control, SDL_Scancode>
 buildSecondaryKeymap();
 
 struct FighterRender

@@ -3,7 +3,6 @@
 #include "../geometry/types.hpp"
 #include "../input/input.hpp"
 #include "../input/keyboardcontroller.hpp"
-#include "commandrecognizer.hpp"
 #include "fighter.hpp"
 
 #include <SDL3/SDL_scancode.h>
@@ -12,23 +11,23 @@
 
 namespace fight_scene_detail {
 
-std::map<Command, SDL_Scancode>
+std::map<Control, SDL_Scancode>
 buildPlayerKeymap()
 {
-  std::map<Command, SDL_Scancode> playerKeymap{};
-  playerKeymap[Command::Left] = SDL_SCANCODE_A;
-  playerKeymap[Command::Right] = SDL_SCANCODE_D;
-  playerKeymap[Command::Punch] = SDL_SCANCODE_J;
+  std::map<Control, SDL_Scancode> playerKeymap{};
+  playerKeymap[Control::Left] = SDL_SCANCODE_A;
+  playerKeymap[Control::Right] = SDL_SCANCODE_D;
+  playerKeymap[Control::One] = SDL_SCANCODE_J;
   return playerKeymap;
 }
 
-std::map<Command, SDL_Scancode>
+std::map<Control, SDL_Scancode>
 buildSecondaryKeymap()
 {
-  std::map<Command, SDL_Scancode> otherKeymap{};
-  otherKeymap[Command::Left] = SDL_SCANCODE_LEFT;
-  otherKeymap[Command::Right] = SDL_SCANCODE_RIGHT;
-  otherKeymap[Command::Punch] = SDL_SCANCODE_KP_0;
+  std::map<Control, SDL_Scancode> otherKeymap{};
+  otherKeymap[Control::Left] = SDL_SCANCODE_LEFT;
+  otherKeymap[Control::Right] = SDL_SCANCODE_RIGHT;
+  otherKeymap[Control::One] = SDL_SCANCODE_KP_0;
   return otherKeymap;
 }
 
@@ -67,15 +66,16 @@ FightScene::start()
 void
 FightScene::ingest(const std::vector<SDL_Event>& events)
 {
-  playerController->ingest(events, sim_tick);
-  otherController->ingest(events, sim_tick);
+  player_controller->ingest(events, sim_tick);
+  other_controller->ingest(events, sim_tick);
 }
 
 void
 FightScene::update()
 {
-  player.update(playerController->get_commands(), playerController->get_held());
-  other.update(otherController->get_commands(), otherController->get_held());
+  player.update(player_controller->get_commands(),
+                player_controller->get_held());
+  other.update(other_controller->get_commands(), other_controller->get_held());
   ++sim_tick;
 }
 
@@ -94,7 +94,9 @@ FightScene::FightScene(std::unique_ptr<InputController> c1,
                        std::shared_ptr<FighterDefinition> other_character)
   : player(0, Vec2{ 50, 100 }, player_character)
   , other(1, Vec2{ 100, 100 }, other_character)
-  , playerController(std::move(c1))
-  , otherController(std::move(c2))
+  , player_controller(std::move(c1))
+  , other_controller(std::move(c2))
+  , cmd_recognizer("data/commands.json")
 {
+  cmd_recognizer.load();
 }

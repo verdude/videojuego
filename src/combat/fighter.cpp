@@ -34,8 +34,8 @@ void
 Fighter::update(const std::vector<Input>& commands, const Held& held)
 {
   constexpr int movement_per_tick = 1;
-  const int direction = static_cast<int>(held[Command::Right].down) -
-                        static_cast<int>(held[Command::Left].down);
+  const int direction = static_cast<int>(held[Control::Right].down) -
+                        static_cast<int>(held[Control::Left].down);
   anchor.x += direction * movement_per_tick;
 
   for (const auto& input : commands) {
@@ -43,7 +43,7 @@ Fighter::update(const std::vector<Input>& commands, const Held& held)
       continue;
     }
 
-    if (input.command == Command::Punch) {
+    if (input.command == Control::One) {
       // TODO: Punch
       std::cout << "Fighter [" << id << "] executing PUNCH move\n";
     }

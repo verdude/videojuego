@@ -1,13 +1,30 @@
 #pragma once
 
 #include "../input/inputcontroller.hpp"
-#include "../combat/fighter.hpp"
+#include "command.hpp"
+#include "fighter.hpp"
 
-class CommandRecognizer {
+#include <nlohmann/json.hpp>
+#include <optional>
+#include <string>
+
+using json = nlohmann::json;
+
+class CommandRecognizer
+{
+private:
+  std::string config_path;
+  std::vector<Command> commands;
+
 public:
-  CommandRecognizer() = delete;
-  CommandRecognizer(CommandRecognizer&) = delete;
-  CommandRecognizer(CommandRecognizer&&) = delete;
+  CommandRecognizer(const char* p)
+    : config_path(p)
+    , commands()
+  {
+  }
 
-  //static CommandEvent recognize(const InputController&, const Fighter&);
+  void load();
+  std::optional<CommandEvent> recognize(const InputController&,
+                                        const Fighter&,
+                                        Tick);
 };

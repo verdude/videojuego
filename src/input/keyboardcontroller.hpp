@@ -10,15 +10,15 @@
 class KeyboardController : public InputController
 {
 private:
-  std::map<Command, SDL_Scancode> scancodes;
-  std::array<Command, SDL_SCANCODE_COUNT> keymap{};
+  std::map<Control, SDL_Scancode> scancodes;
+  std::array<Control, SDL_SCANCODE_COUNT> keymap{};
 
 public:
-  KeyboardController(std::map<Command, SDL_Scancode> k)
+  KeyboardController(std::map<Control, SDL_Scancode> k)
     : InputController()
     , scancodes(k)
   {
-    keymap.fill(Command::None);
+    keymap.fill(Control::None);
     for (const auto& [key, value] : scancodes) {
       keymap[value] = key;
     }
