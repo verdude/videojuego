@@ -15,6 +15,7 @@ class InputController
 protected:
   std::vector<Input> commands;
   // TODO: Move out and replace with Array
+  // TODO: pair Input with Facing direction
   std::vector<Input> history;
   Held held;
 

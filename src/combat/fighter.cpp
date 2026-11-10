@@ -31,7 +31,7 @@ FighterDefinition::block(bool flip)
 }
 
 void
-Fighter::update(const std::vector<Input>& commands, const Held& held)
+Fighter::update(const std::vector<Input>& commands, const Held& held, const Vec2& opp_anchor)
 {
   constexpr int movement_per_tick = 1;
   const int direction = static_cast<int>(held[Control::Right].down) -

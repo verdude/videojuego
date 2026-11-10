@@ -83,7 +83,7 @@ struct Step
   /**
    * Determine whether currently held buttons match this step's requirements.
    */
-  bool match(const Held&, Facing) const;
+  bool match(const Held&, Facing, Tick) const;
 };
 
 /**

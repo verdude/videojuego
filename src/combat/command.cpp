@@ -61,9 +61,10 @@ resolve_control(CommandControl c, Facing f)
 }
 
 bool
-Step::match(const Held& held, Facing facing) const
+Step::match(const Held& held, Facing facing, Tick tick) const
 {
-#pragma GCC unroll static_cast < size_t>(CommandControl::Count)
+  bool this_tick = false;
+#pragma GCC unroll static_cast<size_t>(CommandControl::Count)
   for (size_t i = 0; i < static_cast<size_t>(CommandControl::Count); ++i) {
     if (state[i] == Requirement::Any) {
       continue;
@@ -72,6 +73,9 @@ Step::match(const Held& held, Facing facing) const
     if ((state[i] == Requirement::Down) != held[ctrl].down) {
       return false;
     }
+    if (held[ctrl].tick == tick) {
+      this_tick = true;
+    }
   }
-  return true;
+  return this_tick;
 }

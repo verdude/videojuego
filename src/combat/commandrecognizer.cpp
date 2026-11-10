@@ -35,7 +35,7 @@ CommandRecognizer::recognize(const InputController& ctlr,
   for (CommandId i = 0; i < commands.size(); ++i) {
     bool match = true;
     for (const auto& step : commands[i].steps) {
-      if (!step.match(ctlr.get_held(), facing)) {
+      if (!step.match(ctlr.get_held(), facing, tick)) {
         match = false;
         break;
       }

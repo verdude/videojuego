@@ -50,7 +50,14 @@ public:
     , current_move(who->neutral())
   {
   }
-  void update(const std::vector<Input>&, const Held&);
+
+  /**
+   * @param vector<Input> the inputs for the fighter
+   * @param Held the currently held buttons
+   * @param Vec2 the opponent's current position
+   */
+  void update(const std::vector<Input>&, const Held&, const Vec2&);
+
   const AnimationFrame& frame() const;
   const Vec2& get_anchor() const;
 };
