@@ -1,7 +1,6 @@
 #include "commandrecognizer.hpp"
 
 #include <fstream>
-#include <stdexcept>
 
 void
 CommandRecognizer::load()
@@ -30,13 +29,13 @@ CommandRecognizer::load()
 
 std::optional<CommandEvent>
 CommandRecognizer::recognize(const InputController& ctlr,
-                             const Fighter& fighter,
+                             Facing facing,
                              Tick tick)
 {
   for (CommandId i = 0; i < commands.size(); ++i) {
     bool match = true;
     for (const auto& step : commands[i].steps) {
-      if (!step.match(ctlr.get_held())) {
+      if (!step.match(ctlr.get_held(), facing)) {
         match = false;
         break;
       }

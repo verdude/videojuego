@@ -1,12 +1,12 @@
 #pragma once
 
-#include "scene.hpp"
 #include "../animation/assetstore.hpp"
 #include "../graphics/graphics.hpp"
 #include "../input/inputcontroller.hpp"
 #include "../input/keyboardcontroller.hpp"
 #include "commandrecognizer.hpp"
 #include "fighter.hpp"
+#include "scene.hpp"
 
 #include <memory>
 #include <vector>

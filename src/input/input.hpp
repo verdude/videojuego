@@ -5,17 +5,23 @@
 
 using Tick = uint64_t;
 
+/**
+ * The possible inputs. Count is just for convenience for getting the size of
+ * the enum.
+ */
 enum Control
 {
   Left,
   Right,
+  Up,
+  Down,
   One,
+  Two,
+  Three,
+  Four,
   Count,
   None,
 };
-
-Control
-control_from_string(const std::string&);
 
 enum class InputChange
 {
@@ -40,7 +46,7 @@ struct HeldState
 
 struct Chord
 {
-  enum InputState
+  enum class InputState
   {
     Up,
     Down,

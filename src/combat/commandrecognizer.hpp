@@ -2,7 +2,6 @@
 
 #include "../input/inputcontroller.hpp"
 #include "command.hpp"
-#include "fighter.hpp"
 
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -24,7 +23,5 @@ public:
   }
 
   void load();
-  std::optional<CommandEvent> recognize(const InputController&,
-                                        const Fighter&,
-                                        Tick);
+  std::optional<CommandEvent> recognize(const InputController&, Facing, Tick);
 };
