@@ -54,6 +54,13 @@ MoveState::complete() const
   return move.total_frames() <= current_frame;
 }
 
+bool
+MoveState::can_auto_facing() const
+{
+  // TODO: MoveDefinition#can_turn || complete
+  return complete();
+}
+
 void
 MoveState::tick()
 {

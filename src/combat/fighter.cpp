@@ -39,7 +39,9 @@ Fighter::advance_move_time()
 void
 Fighter::update_facing(bool face_right)
 {
-  facing = face_right ? Facing::Right : Facing::Left;
+  if (current_move.can_auto_facing()) {
+    facing = face_right ? Facing::Right : Facing::Left;
+  }
 }
 
 void

@@ -9,6 +9,7 @@ class MoveDefinition
 {
   uint32_t damage;
   AnimationClip* animation;
+  // TODO: determine whether can update facing during move
 
 public:
   MoveDefinition(uint32_t, AnimationClip*);
@@ -28,5 +29,6 @@ public:
   MoveState(MoveDefinition&, bool);
   const AnimationFrame& frame() const;
   bool complete() const;
+  bool can_auto_facing() const;
   void tick();
 };
