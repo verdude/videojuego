@@ -20,7 +20,7 @@ MoveDefinition::get_animation() const
   return animation;
 }
 
-uint64_t
+std::size_t
 MoveDefinition::total_frames() const
 {
   return animation->num_frames();
