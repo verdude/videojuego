@@ -22,7 +22,6 @@ class MoveState
   MoveDefinition& move;
   size_t current_frame;
   double frame_millis;
-  bool flip;
 
 public:
   MoveState(MoveDefinition&);

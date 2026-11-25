@@ -59,5 +59,5 @@ public:
   void debug(const char*, bool = true);
   void present();
   void clear();
-  void render_texture(const AnimationFrame*, const Rect*);
+  void render_texture(const AnimationFrame*, const Rect*, bool);
 };

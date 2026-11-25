@@ -36,7 +36,6 @@ MoveState::MoveState(MoveDefinition& move_)
   : move(move_)
   , current_frame(0)
   , frame_millis(0)
-  , flip(false)
 {
 }
 
@@ -44,7 +43,6 @@ MoveState::MoveState(MoveDefinition& move_, bool flip_)
   : move(move_)
   , current_frame(0)
   , frame_millis(0)
-  , flip(flip_)
 {
 }
 

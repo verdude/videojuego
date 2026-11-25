@@ -48,6 +48,7 @@ struct FighterRender
 {
   const AnimationFrame& frame;
   Rect destination;
+  bool flip;
 };
 
 const FighterRender

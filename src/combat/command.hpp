@@ -4,9 +4,9 @@
 
 #include <cstdint>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 using CommandId = uint16_t;
 using Tick = uint64_t;

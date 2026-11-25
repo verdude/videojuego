@@ -64,7 +64,7 @@ bool
 Step::match(const Held& held, Facing facing, Tick tick) const
 {
   bool this_tick = false;
-#pragma GCC unroll static_cast<size_t>(CommandControl::Count)
+#pragma GCC unroll static_cast < size_t>(CommandControl::Count)
   for (size_t i = 0; i < static_cast<size_t>(CommandControl::Count); ++i) {
     if (state[i] == Requirement::Any) {
       continue;

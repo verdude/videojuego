@@ -9,4 +9,6 @@ struct Rect
 struct Vec2
 {
   int x, y;
+
+  bool left_of(const Vec2& other) const { return x <= other.x; }
 };

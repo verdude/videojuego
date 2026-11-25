@@ -31,7 +31,19 @@ FighterDefinition::block(bool flip)
 }
 
 void
-Fighter::update(const std::vector<Input>& commands, const Held& held, const Vec2& opp_anchor)
+Fighter::advance_move_time()
+{
+  current_move.tick();
+}
+
+void
+Fighter::update_facing(bool face_right)
+{
+  facing = face_right ? Facing::Right : Facing::Left;
+}
+
+void
+Fighter::update(const std::vector<Input>& commands, const Held& held)
 {
   constexpr int movement_per_tick = 1;
   const int direction = static_cast<int>(held[Control::Right].down) -
@@ -48,7 +60,6 @@ Fighter::update(const std::vector<Input>& commands, const Held& held, const Vec2
       std::cout << "Fighter [" << id << "] executing PUNCH move\n";
     }
   }
-  current_move.tick();
 }
 
 const AnimationFrame&

@@ -67,9 +67,17 @@ Graphics::clear()
 }
 
 void
-Graphics::render_texture(const AnimationFrame* f, const Rect* dest)
+Graphics::render_texture(const AnimationFrame* f, const Rect* dest, bool flip)
 {
   SDL_FRect src{ float(f->x), float(f->y), float(f->w), float(f->h) };
   SDL_FRect sdl_dest{ dest->x, dest->y, dest->w, dest->h };
-  SDL_RenderTexture(renderer.r, f->texture->texture, &src, &sdl_dest);
+  SDL_RenderTextureRotated(
+  renderer.r,
+  f->texture->texture,
+  &src,
+  &sdl_dest,
+  0.0,
+  nullptr,
+  flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE
+);
 }
