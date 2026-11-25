@@ -1,69 +1,72 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
+#include <stdexcept>
+#include <utility>
 
-class RingBuffer<typename T, size_t N> {
+// A fixed-capacity history, read from oldest to newest. Pushing into a full
+// buffer replaces the oldest item and invalidates existing iterators.
+template<typename T, std::size_t N>
+class RingBuffer
+{
+  static_assert(N > 0, "RingBuffer capacity must be greater than zero");
+
 private:
-  size_t start = 0;
-  size_t count = 0;
+  std::size_t start = 0;
+  std::size_t count = 0;
   std::array<T, N> mem{};
 
 public:
-  void
-  push(T item)
+  void push(T item)
   {
-    size_t i = (start+count)%N;
-    mem[i] = item;
+    std::size_t i = (start + count) % N;
+    mem[i] = std::move(item);
     if (count < N) {
       ++count;
     } else {
-      start = (start+1)%N;
+      start = (start + 1) % N;
     }
   }
 
-  const T&
-  at(size_t i) const
+  const T& at(std::size_t i) const
   {
-    return mem[(start+i)%N];
+    if (i >= count) {
+      throw std::out_of_range("RingBuffer index out of range");
+    }
+    return mem[(start + i) % N];
   }
 
-  class Iterator {
-    private:
-      const RingBuffer& b;
-      size_t i;
+  class Iterator
+  {
+  private:
+    const RingBuffer& b;
+    std::size_t i;
 
-    public:
-      Iterator(const RingBuffer& b_, size_t i_) : b(b_), i(i_) {}
+  public:
+    Iterator(const RingBuffer& b_, std::size_t i_)
+      : b(b_)
+      , i(i_)
+    {
+    }
 
-      const T&
-      operator*() const
-      {
-        return b.at(i);
-      }
+    const T& operator*() const { return b.at(i); }
 
-      Iterator&
-      operator++()
-      {
-        ++i;
-        return *this;
-      }
+    Iterator& operator++()
+    {
+      ++i;
+      return *this;
+    }
 
-      bool
-      operator!=(const Iterator& other) const
-      {
-        return i != other.i;
-      }
+    bool operator==(const Iterator& other) const
+    {
+      return &b == &other.b && i == other.i;
+    }
+
+    bool operator!=(const Iterator& other) const { return !(*this == other); }
   };
 
-  Iterator
-  begin()
-  {
-    return Iterator(*this, 0);
-  }
+  Iterator begin() const { return Iterator(*this, 0); }
 
-  Iterator
-  end()
-  {
-    return Iterator(*this, count);
-  }
+  Iterator end() const { return Iterator(*this, count); }
 };

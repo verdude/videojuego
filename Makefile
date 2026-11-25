@@ -28,7 +28,7 @@ clean:
 
 test:
 	cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON $(CMAKE_FLAGS)
-	cmake --build build/debug --target cmd_recognizer_tests
+	cmake --build build/debug --target cmd_recognizer_tests ringbuffer_tests
 	ctest --test-dir build/debug --output-on-failure $(CTEST_FLAGS)
 
 all: debug reldebug release

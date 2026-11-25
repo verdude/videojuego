@@ -32,3 +32,8 @@ target_link_libraries(cmd_recognizer_tests PRIVATE
 
 include(GoogleTest)
 gtest_discover_tests(cmd_recognizer_tests PROPERTIES LABELS recognizer)
+
+add_executable(ringbuffer_tests ringbuffer_test.cpp)
+target_include_directories(ringbuffer_tests PRIVATE ../src)
+target_link_libraries(ringbuffer_tests PRIVATE GTest::gtest_main)
+gtest_discover_tests(ringbuffer_tests PROPERTIES LABELS ringbuffer)

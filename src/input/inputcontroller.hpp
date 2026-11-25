@@ -25,6 +25,9 @@ public:
   virtual void reset() = 0;
 
   const std::vector<Input>& get_commands() const { return commands; }
-  const std::vector<Input>& get_history() const { return history; }
+  const RingBuffer<Input, HISTORY_LENGTH>& get_history() const
+  {
+    return history;
+  }
   const Held& get_held() const { return held; }
 };

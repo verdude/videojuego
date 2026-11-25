@@ -37,7 +37,7 @@ public:
     for (const auto& [control, change] : edges) {
       const Input input{ control, change, tick };
       commands.push_back(input);
-      history.push_back(input);
+      history.push(input);
       held.update(control, change == pressed, tick);
     }
   }
