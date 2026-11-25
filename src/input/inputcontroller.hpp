@@ -2,21 +2,21 @@
 
 #include "../input/held.hpp"
 #include "../input/input.hpp"
+#include "../util/ringbuffer.hpp"
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
 #include <unordered_map>
 #include <vector>
 
-#define MAX_HISTORY_LENGTH 10
+#define HISTORY_LENGTH 32
 
 class InputController
 {
 protected:
   std::vector<Input> commands;
-  // TODO: Move out and replace with Array
   // TODO: pair Input with Facing direction
-  std::vector<Input> history;
+  RingBuffer<Input, HISTORY_LENGTH> history;
   Held held;
 
 public:

@@ -20,7 +20,7 @@ KeyboardController::ingest(const std::vector<SDL_Event>& events, uint64_t tick)
       };
       commands.push_back(input);
       held.update(command, event.key.down, tick);
-      // TODO: history
+      history.push(input);
     }
   }
 }
