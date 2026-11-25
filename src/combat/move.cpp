@@ -39,13 +39,6 @@ MoveState::MoveState(MoveDefinition& move_)
 {
 }
 
-MoveState::MoveState(MoveDefinition& move_, bool flip_)
-  : move(move_)
-  , current_frame(0)
-  , frame_millis(0)
-{
-}
-
 const AnimationFrame&
 MoveState::frame() const
 {

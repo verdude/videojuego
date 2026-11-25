@@ -7,27 +7,27 @@
 #include <vector>
 
 MoveState
-FighterDefinition::punch(bool flip)
+FighterDefinition::punch()
 {
-  return MoveState(punch_, flip);
+  return MoveState(punch_);
 }
 
 MoveState
-FighterDefinition::walk(bool flip)
+FighterDefinition::walk()
 {
-  return MoveState(walk_, flip);
+  return MoveState(walk_);
 }
 
 MoveState
-FighterDefinition::neutral(bool flip)
+FighterDefinition::neutral()
 {
-  return MoveState(neutral_, flip);
+  return MoveState(neutral_);
 }
 
 MoveState
-FighterDefinition::block(bool flip)
+FighterDefinition::block()
 {
-  return MoveState(block_, flip);
+  return MoveState(block_);
 }
 
 void
